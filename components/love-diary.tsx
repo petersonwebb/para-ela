@@ -22,19 +22,12 @@ export default function LoveDiary() {
   const [showPasswordInput, setShowPasswordInput] = useState(false)
   const [isPosting, setIsPosting] = useState(false)
   const [expandedImage, setExpandedImage] = useState<{src: string, content: string, date: string} | null>(null)
-  const [syncUrl, setSyncUrl] = useState("")
-  const [isSyncing, setIsSyncing] = useState(false)
-  const [lastSync, setLastSync] = useState<Date | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const syncIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Carregar entradas salvas do localStorage
   useEffect(() => {
     const saved = localStorage.getItem("vlogEntries")
-    const savedSyncUrl = localStorage.getItem("vlogSyncUrl")
-    const savedLastSync = localStorage.getItem("vlogLastSync")
-    
     console.log("Carregando do localStorage:", saved)
     if (saved) {
       try {
@@ -47,80 +40,7 @@ export default function LoveDiary() {
     } else {
       console.log("Nenhuma entrada salva encontrada")
     }
-
-    if (savedSyncUrl) {
-      setSyncUrl(savedSyncUrl)
-    }
-    
-    if (savedLastSync) {
-      setLastSync(new Date(savedLastSync))
-    }
   }, [])
-
-  // Configurar sincronização automática
-  useEffect(() => {
-    if (syncUrl) {
-      // Salvar URL no localStorage
-      localStorage.setItem("vlogSyncUrl", syncUrl)
-      
-      // Iniciar sincronização automática a cada 30 segundos
-      syncIntervalRef.current = setInterval(() => {
-        syncFromUrl()
-      }, 30000)
-      
-      // Primeira sincronização
-      syncFromUrl()
-    } else {
-      // Parar sincronização se não houver URL
-      if (syncIntervalRef.current) {
-        clearInterval(syncIntervalRef.current)
-        syncIntervalRef.current = null
-      }
-    }
-
-    return () => {
-      if (syncIntervalRef.current) {
-        clearInterval(syncIntervalRef.current)
-      }
-    }
-  }, [syncUrl])
-
-  // Sincronizar com URL externa
-  const syncFromUrl = async () => {
-    if (!syncUrl) return
-    
-    try {
-      setIsSyncing(true)
-      const response = await fetch(syncUrl)
-      if (response.ok) {
-        const data = await response.json()
-        if (Array.isArray(data)) {
-          // Mesclar mensagens existentes com as da URL
-          const mergedEntries = [...vlogEntries, ...data]
-          const uniqueEntries = mergedEntries.filter((entry, index, self) => 
-            index === self.findIndex(e => e.id === entry.id)
-          )
-          
-          if (JSON.stringify(uniqueEntries) !== JSON.stringify(vlogEntries)) {
-            setVlogEntries(uniqueEntries)
-            localStorage.setItem("vlogEntries", JSON.stringify(uniqueEntries))
-            setLastSync(new Date())
-            localStorage.setItem("vlogLastSync", new Date().toISOString())
-            console.log("Sincronização realizada com sucesso!")
-          }
-        }
-      }
-    } catch (error) {
-      console.log("Erro na sincronização:", error)
-    } finally {
-      setIsSyncing(false)
-    }
-  }
-
-  // Sincronizar manualmente
-  const manualSync = () => {
-    syncFromUrl()
-  }
 
   // Verificar senha
   const checkPassword = () => {
@@ -141,7 +61,7 @@ export default function LoveDiary() {
   }
 
   // Postar nova entrada no vlog
-  const postEntry = async () => {
+  const postEntry = () => {
     if (!newEntry.trim() && !selectedImage) return
 
     const entry: VlogEntry = {
@@ -158,20 +78,6 @@ export default function LoveDiary() {
     
     setVlogEntries(updatedEntries)
     localStorage.setItem("vlogEntries", JSON.stringify(updatedEntries))
-    
-    // Sincronizar com URL externa se configurada
-    if (syncUrl) {
-      try {
-        // Aqui você pode implementar o upload para a URL externa
-        // Por exemplo, usando fetch com método POST ou PUT
-        console.log("Sincronizando com URL externa...")
-        // Nota: Esta é uma implementação básica. Para sincronização real,
-        // você precisaria de um servidor ou serviço que aceite POST/PUT
-      } catch (error) {
-        console.log("Erro ao sincronizar:", error)
-      }
-    }
-    
     clearForm()
     setIsPosting(true)
     
@@ -229,59 +135,6 @@ export default function LoveDiary() {
     setExpandedImage({ src, content, date })
   }
 
-  // Exportar mensagens para arquivo JSON
-  const exportMessages = () => {
-    if (vlogEntries.length === 0) {
-      alert("Não há mensagens para exportar!")
-      return
-    }
-
-    const dataStr = JSON.stringify(vlogEntries, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `vlog-mensagens-${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`
-    link.click()
-    URL.revokeObjectURL(url)
-  }
-
-  // Importar mensagens de arquivo JSON
-  const importMessages = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const importedData = JSON.parse(e.target?.result as string)
-        
-        if (Array.isArray(importedData)) {
-          // Mesclar mensagens existentes com as importadas
-          const mergedEntries = [...vlogEntries, ...importedData]
-          // Remover duplicatas baseado no ID
-          const uniqueEntries = mergedEntries.filter((entry, index, self) => 
-            index === self.findIndex(e => e.id === entry.id)
-          )
-          
-          setVlogEntries(uniqueEntries)
-          localStorage.setItem("vlogEntries", JSON.stringify(uniqueEntries))
-          alert(`Importação realizada! ${importedData.length} mensagens adicionadas.`)
-        } else {
-          alert("Arquivo inválido! Deve conter um array de mensagens.")
-        }
-      } catch (error) {
-        alert("Erro ao importar arquivo! Verifique se é um JSON válido.")
-      }
-    }
-    reader.readAsText(file)
-    
-    // Limpar o input para permitir importar o mesmo arquivo novamente
-    if (event.target) {
-      event.target.value = ""
-    }
-  }
-
   return (
     <section className="py-20 px-4">
       <div className="max-w-4xl mx-auto">
@@ -325,65 +178,13 @@ export default function LoveDiary() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={exportMessages}
-                    className="border-green-500/20 text-green-400 hover:bg-green-500/10 px-2 py-1 text-xs"
+                    onClick={clearAllEntries}
+                    className="border-red-500/20 text-red-400 hover:bg-red-500/10 px-2 py-1 text-xs"
                   >
-                    📤 Exportar
-                  </Button>
-                  <input
-                    type="file"
-                    accept=".json"
-                    onChange={importMessages}
-                    className="hidden"
-                    id="import-file"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('import-file')?.click()}
-                    className="border-blue-500/20 text-blue-400 hover:bg-blue-500/10 px-2 py-1 text-xs"
-                  >
-                    📥 Importar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={manualSync}
-                    disabled={!syncUrl || isSyncing}
-                    className="border-purple-500/20 text-purple-400 hover:bg-purple-500/10 px-2 py-1 text-xs disabled:opacity-50"
-                  >
-                    {isSyncing ? "🔄" : "🔄 Sinc"}
+                    🗑️ Limpar Todas as Mensagens
                   </Button>
                 </div>
               </div>
-              
-              {/* Status da Sincronização */}
-              {syncUrl && (
-                <div className="bg-background/30 rounded-lg p-2 border border-primary/10">
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="text-green-400">🔗 Sincronização Ativa</span>
-                      {lastSync && (
-                        <span className="text-muted-foreground">
-                          Última sinc: {lastSync.toLocaleTimeString('pt-BR')}
-                        </span>
-                      )}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSyncUrl("")
-                        localStorage.removeItem("vlogSyncUrl")
-                        localStorage.removeItem("vlogLastSync")
-                      }}
-                      className="border-red-500/20 text-red-400 hover:bg-red-500/10 px-2 py-1 text-xs"
-                    >
-                      ❌ Desativar
-                    </Button>
-                  </div>
-                </div>
-              )}
               
               <div className="space-y-2 sm:space-y-3 max-h-48 sm:max-h-60 overflow-y-auto">
                 {vlogEntries.map((entry) => (
@@ -417,17 +218,7 @@ export default function LoveDiary() {
           {/* Mensagem quando não há entradas */}
           {vlogEntries.length === 0 && (
             <div className="text-center py-4 sm:py-6 mb-4 sm:mb-6">
-              <p className="text-muted-foreground text-sm sm:text-base mb-3">Nenhuma mensagem postada ainda... 💕</p>
-              <div className="bg-background/30 rounded-lg p-3 border border-primary/10">
-                <p className="text-muted-foreground text-xs mb-2">💡 <strong>Dica de Sincronização:</strong></p>
-                <p className="text-muted-foreground text-xs leading-relaxed mb-3">
-                  Para sincronizar mensagens entre dispositivos: use o botão "📤 Exportar" em um dispositivo 
-                  e depois "📥 Importar" no outro dispositivo com o arquivo gerado.
-                </p>
-                <p className="text-muted-foreground text-xs leading-relaxed">
-                  <strong>Ou configure sincronização automática</strong> na área de autenticação para sincronização em tempo real!
-                </p>
-              </div>
+              <p className="text-muted-foreground text-sm sm:text-base">Nenhuma mensagem postada ainda... 💕</p>
             </div>
           )}
 
@@ -436,39 +227,6 @@ export default function LoveDiary() {
             <div className="space-y-3 sm:space-y-4">
               <div className="text-center py-3 sm:py-4 md:py-6">
                 <p className="text-muted-foreground mb-3 sm:mb-4 text-xs sm:text-sm md:text-base">🔒 Para escrever uma nova mensagem, digite a senha</p>
-                
-                {/* Configuração de Sincronização */}
-                <div className="mb-4 p-3 bg-background/30 rounded-lg border border-primary/10">
-                  <h5 className="font-semibold text-foreground text-sm mb-2">🔄 Configurar Sincronização</h5>
-                  <p className="text-muted-foreground text-xs mb-3">
-                    Para sincronizar mensagens entre dispositivos, configure uma URL de arquivo JSON compartilhado
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-2 items-center">
-                    <input
-                      type="url"
-                      value={syncUrl}
-                      onChange={(e) => setSyncUrl(e.target.value)}
-                      placeholder="https://exemplo.com/vlog.json"
-                      className="flex-1 px-3 py-2 bg-background/50 border border-primary/20 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 text-xs sm:text-sm"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        if (syncUrl) {
-                          localStorage.setItem("vlogSyncUrl", syncUrl)
-                          alert("Sincronização configurada! As mensagens serão sincronizadas automaticamente.")
-                        }
-                      }}
-                      className="border-primary/20 text-primary hover:bg-primary/10 px-3 py-2 text-xs sm:text-sm"
-                    >
-                      ✅ Configurar
-                    </Button>
-                  </div>
-                  <div className="mt-2 text-xs text-muted-foreground">
-                    💡 <strong>Dicas:</strong> Use Google Drive, Dropbox ou OneDrive para compartilhar o arquivo JSON
-                  </div>
-                </div>
                 
                 {!showPasswordInput ? (
                   <Button
@@ -568,7 +326,7 @@ export default function LoveDiary() {
                   <Button
                     variant="outline"
                     onClick={() => setIsAuthenticated(false)}
-                    className="border-primary/20 text-primary hover:bg-primary/10 w-full sm:w-auto px-3 py-2 text-xs sm:text-sm"
+                    className="border-primary/20 text-primary hover:bg-primary/10 w-full sm:w-auto px-2 py-2 text-xs sm:text-sm"
                   >
                     🔒 Bloquear Área de Escrita
                   </Button>
@@ -578,15 +336,15 @@ export default function LoveDiary() {
                         variant="outline"
                         size="sm"
                         onClick={clearAllEntries}
-                        className="border-red-500/20 text-red-400 hover:bg-red-500/10 w-full sm:w-auto px-3 py-2 text-xs"
+                        className="border-red-500/20 text-red-400 hover:bg-red-500/10 w-full sm:w-auto px-2 py-2 text-xs"
                       >
                         🗑️ Limpar Todas as Mensagens
                       </Button>
                     )}
                     <Button
                       onClick={postEntry}
-                      disabled={!newEntry.trim()}
-                      className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto px-3 py-2 text-xs sm:text-sm"
+                      disabled={!newEntry.trim() && !selectedImage}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto px-2 py-2 text-xs sm:text-sm"
                     >
                       📤 Postar Mensagem
                     </Button>

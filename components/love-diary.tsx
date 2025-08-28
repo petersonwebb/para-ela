@@ -135,6 +135,59 @@ export default function LoveDiary() {
     setExpandedImage({ src, content, date })
   }
 
+  // Exportar mensagens para arquivo JSON
+  const exportMessages = () => {
+    if (vlogEntries.length === 0) {
+      alert("Não há mensagens para exportar!")
+      return
+    }
+
+    const dataStr = JSON.stringify(vlogEntries, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `vlog-mensagens-${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // Importar mensagens de arquivo JSON
+  const importMessages = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target?.result as string)
+        
+        if (Array.isArray(importedData)) {
+          // Mesclar mensagens existentes com as importadas
+          const mergedEntries = [...vlogEntries, ...importedData]
+          // Remover duplicatas baseado no ID
+          const uniqueEntries = mergedEntries.filter((entry, index, self) => 
+            index === self.findIndex(e => e.id === entry.id)
+          )
+          
+          setVlogEntries(uniqueEntries)
+          localStorage.setItem("vlogEntries", JSON.stringify(uniqueEntries))
+          alert(`Importação realizada! ${importedData.length} mensagens adicionadas.`)
+        } else {
+          alert("Arquivo inválido! Deve conter um array de mensagens.")
+        }
+      } catch (error) {
+        alert("Erro ao importar arquivo! Verifique se é um JSON válido.")
+      }
+    }
+    reader.readAsText(file)
+    
+    // Limpar o input para permitir importar o mesmo arquivo novamente
+    if (event.target) {
+      event.target.value = ""
+    }
+  }
+
   return (
     <section className="py-20 px-4">
       <div className="max-w-4xl mx-auto">
@@ -172,7 +225,34 @@ export default function LoveDiary() {
           {/* Lista de mensagens postadas - sempre visível */}
           {vlogEntries.length > 0 && (
             <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
-              <h4 className="font-semibold text-foreground text-center sm:text-left text-sm sm:text-base">Mensagens Postadas ({vlogEntries.length}):</h4>
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
+                <h4 className="font-semibold text-foreground text-center sm:text-left text-sm sm:text-base">Mensagens Postadas ({vlogEntries.length}):</h4>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={exportMessages}
+                    className="border-green-500/20 text-green-400 hover:bg-green-500/10 px-2 py-1 text-xs"
+                  >
+                    📤 Exportar
+                  </Button>
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={importMessages}
+                    className="hidden"
+                    id="import-file"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('import-file')?.click()}
+                    className="border-blue-500/20 text-blue-400 hover:bg-blue-500/10 px-2 py-1 text-xs"
+                  >
+                    📥 Importar
+                  </Button>
+                </div>
+              </div>
               <div className="space-y-2 sm:space-y-3 max-h-48 sm:max-h-60 overflow-y-auto">
                 {vlogEntries.map((entry) => (
                   <div key={entry.id} className="p-2 sm:p-3 bg-background/30 rounded-lg border border-primary/10">
@@ -205,7 +285,14 @@ export default function LoveDiary() {
           {/* Mensagem quando não há entradas */}
           {vlogEntries.length === 0 && (
             <div className="text-center py-4 sm:py-6 mb-4 sm:mb-6">
-              <p className="text-muted-foreground text-sm sm:text-base">Nenhuma mensagem postada ainda... 💕</p>
+              <p className="text-muted-foreground text-sm sm:text-base mb-3">Nenhuma mensagem postada ainda... 💕</p>
+              <div className="bg-background/30 rounded-lg p-3 border border-primary/10">
+                <p className="text-muted-foreground text-xs mb-2">💡 <strong>Dica de Sincronização:</strong></p>
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  Para sincronizar mensagens entre dispositivos: use o botão "📤 Exportar" em um dispositivo 
+                  e depois "📥 Importar" no outro dispositivo com o arquivo gerado.
+                </p>
+              </div>
             </div>
           )}
 

@@ -30,25 +30,27 @@ export default function HomePage() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background/80" />
 
-        <div className="relative z-10 container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <div className="relative z-10 container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-center">
           {/* Texto à esquerda */}
-          <div className="text-left animate-fade-in-up">
-            <h1 className="font-playfair text-5xl md:text-7xl lg:text-8xl text-primary mb-6 animate-float">
-              Bem-vinda, meu amor ❤️
+          <div className="text-center lg:text-left animate-fade-in-up">
+            <h1 className="font-playfair text-4xl md:text-6xl lg:text-5xl xl:text-6xl text-primary mb-6 animate-float leading-tight">
+              Bem-vinda
+              <br />
+              meu amor ❤️
             </h1>
-            <p className="text-xl md:text-2xl text-foreground/80 max-w-2xl leading-relaxed">
+            <p className="text-lg md:text-xl lg:text-xl text-foreground/80 max-w-xl lg:max-w-2xl mx-auto lg:mx-0 leading-relaxed">
               Este é o nosso espaço especial, onde cada momento juntos é eternizado com amor
             </p>
             <div className="mt-8">
               <div className="inline-block animate-heartbeat">
-                <span className="text-6xl">💕</span>
+                <span className="text-5xl lg:text-6xl">💕</span>
               </div>
             </div>
           </div>
 
           {/* Card com vídeo à direita */}
-          <div className="flex justify-center lg:justify-end">
-            <div className="bg-background/90 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-primary/20 max-w-md w-full">
+          <div className="flex justify-center lg:justify-start">
+            <div className="bg-background/90 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-primary/20 max-w-sm md:max-w-md lg:max-w-lg w-full">
               <video
                 className="w-full h-auto rounded-xl"
                 autoPlay

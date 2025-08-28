@@ -100,16 +100,17 @@ export default function LoveDiary() {
     }
 
     const updatedEntries = [entry, ...vlogEntries]
-    setVlogEntries(updatedEntries)
-    
     // Salvar no GitHub
-    await saveMessagesToGitHub(updatedEntries)
-    
-    clearForm()
-    setIsPosting(true)
-    
-    // Mostrar confirmação temporariamente
-    setTimeout(() => setIsPosting(false), 2000)
+    const success = await saveMessagesToGitHub(updatedEntries)
+    if (success) {
+      setVlogEntries(updatedEntries)
+      clearForm()
+      setIsPosting(true)
+      // Mostrar confirmação temporariamente
+      setTimeout(() => setIsPosting(false), 2000)
+    } else {
+      alert('Não foi possível postar a mensagem. Tente novamente.');
+    }
   }
 
   // Limpar todas as entradas

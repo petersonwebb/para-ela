@@ -39,9 +39,9 @@ export const saveMessagesToGitHub = async (messages: VlogEntry[]): Promise<boole
     // Salvar no localStorage como backup
     localStorage.setItem('vlogEntries', JSON.stringify(messages));
 
-    // Enviar para API segura
+    // Enviar para Netlify Function
     try {
-      const response = await fetch('/api/save-vlog-messages', {
+      const response = await fetch('/.netlify/functions/save-vlog-messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

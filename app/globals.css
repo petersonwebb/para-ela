@@ -176,3 +176,54 @@
 .animate-heartbeat {
   animation: heartbeat 2s ease-in-out infinite;
 }
+
+/* Animações neon para o card */
+@keyframes neon-flow {
+  0% {
+    background: linear-gradient(90deg, #f472b6, #ec4899, #db2777);
+    transform: rotate(0deg);
+  }
+  25% {
+    background: linear-gradient(180deg, #f472b6, #ec4899, #db2777);
+  }
+  50% {
+    background: linear-gradient(270deg, #f472b6, #ec4899, #db2777);
+    transform: rotate(180deg);
+  }
+  75% {
+    background: linear-gradient(0deg, #f472b6, #ec4899, #db2777);
+  }
+  100% {
+    background: linear-gradient(90deg, #f472b6, #ec4899, #db2777);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes neon-flow-reverse {
+  0% {
+    background: linear-gradient(270deg, #f472b6, #ec4899, #db2777);
+    transform: rotate(0deg);
+  }
+  25% {
+    background: linear-gradient(0deg, #f472b6, #ec4899, #db2777);
+  }
+  50% {
+    background: linear-gradient(90deg, #f472b6, #ec4899, #db2777);
+    transform: rotate(-180deg);
+  }
+  75% {
+    background: linear-gradient(180deg, #f472b6, #ec4899, #db2777);
+  }
+  100% {
+    background: linear-gradient(270deg, #f472b6, #ec4899, #db2777);
+    transform: rotate(-360deg);
+  }
+}
+
+.animate-neon-flow {
+  animation: neon-flow 4s linear infinite;
+}
+
+.animate-neon-flow-reverse {
+  animation: neon-flow-reverse 3s linear infinite;
+}

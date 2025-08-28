@@ -51,18 +51,24 @@ export default function HomePage() {
 
           {/* Card com vídeo à direita */}
           <div className="flex justify-center lg:justify-start">
-            <div className="bg-background/90 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-primary/20 max-w-sm md:max-w-md lg:max-w-lg w-full">
-              <video
-                className="w-full h-auto rounded-xl"
-                autoPlay
-                muted
-                loop
-                playsInline
-                controls={false}
-              >
-                <source src="/euela.mp4" type="video/mp4" />
-                Seu navegador não suporta vídeos.
-              </video>
+            <div className="relative">
+              {/* Efeito neon rosinha */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 rounded-2xl blur-sm opacity-75 animate-neon-flow"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 rounded-2xl blur-sm opacity-75 animate-neon-flow-reverse"></div>
+              
+              <div className="relative bg-background/90 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-primary/20 max-w-sm md:max-w-md lg:max-w-lg w-full">
+                <video
+                  className="w-full h-auto rounded-xl"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  controls={false}
+                >
+                  <source src="/euela.mp4" type="video/mp4" />
+                  Seu navegador não suporta vídeos.
+                </video>
+              </div>
             </div>
           </div>
         </div>

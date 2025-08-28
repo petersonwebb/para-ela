@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect, useRef } from "react"
+import { supabase } from "@/lib/supabase"
 
 interface VlogEntry {
   id: string
@@ -10,6 +11,7 @@ interface VlogEntry {
   content: string
   image?: string
   timestamp: string
+  created_at: string
 }
 
 export default function LoveDiary() {
@@ -22,25 +24,38 @@ export default function LoveDiary() {
   const [showPasswordInput, setShowPasswordInput] = useState(false)
   const [isPosting, setIsPosting] = useState(false)
   const [expandedImage, setExpandedImage] = useState<{src: string, content: string, date: string} | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Carregar entradas salvas do localStorage
+  // Carregar mensagens do Supabase
   useEffect(() => {
-    const saved = localStorage.getItem("vlogEntries")
-    console.log("Carregando do localStorage:", saved)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        console.log("Entradas carregadas:", parsed)
-        setVlogEntries(parsed)
-      } catch (error) {
-        console.log("Erro ao carregar entradas:", error)
-      }
-    } else {
-      console.log("Nenhuma entrada salva encontrada")
-    }
+    fetchMessages()
   }, [])
+
+  // Buscar mensagens do banco de dados
+  const fetchMessages = async () => {
+    try {
+      setIsLoading(true)
+      const { data, error } = await supabase
+        .from('vlog_entries')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Erro ao buscar mensagens:', error)
+        return
+      }
+
+      if (data) {
+        setVlogEntries(data)
+      }
+    } catch (error) {
+      console.error('Erro ao buscar mensagens:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   // Verificar senha
   const checkPassword = () => {
@@ -61,35 +76,67 @@ export default function LoveDiary() {
   }
 
   // Postar nova entrada no vlog
-  const postEntry = () => {
+  const postEntry = async () => {
     if (!newEntry.trim() && !selectedImage) return
 
-    const entry: VlogEntry = {
-      id: Date.now().toString(),
-      date: new Date().toLocaleDateString("pt-BR"),
-      content: newEntry.trim(),
-      image: imagePreview,
-      timestamp: new Date().toLocaleString("pt-BR")
-    }
+    try {
+      setIsPosting(true)
+      
+      const entry = {
+        content: newEntry.trim(),
+        image: imagePreview || null,
+        date: new Date().toLocaleDateString("pt-BR"),
+        timestamp: new Date().toLocaleString("pt-BR")
+      }
 
-    console.log("Postando nova entrada:", entry)
-    const updatedEntries = [entry, ...vlogEntries]
-    console.log("Entradas atualizadas:", updatedEntries)
-    
-    setVlogEntries(updatedEntries)
-    localStorage.setItem("vlogEntries", JSON.stringify(updatedEntries))
-    clearForm()
-    setIsPosting(true)
-    
-    // Mostrar confirmação temporariamente
-    setTimeout(() => setIsPosting(false), 2000)
+      const { data, error } = await supabase
+        .from('vlog_entries')
+        .insert([entry])
+        .select()
+
+      if (error) {
+        console.error('Erro ao postar mensagem:', error)
+        alert('Erro ao postar mensagem. Tente novamente.')
+        return
+      }
+
+      if (data) {
+        // Atualizar a lista local
+        setVlogEntries([data[0], ...vlogEntries])
+        clearForm()
+        
+        // Mostrar confirmação
+        setTimeout(() => setIsPosting(false), 2000)
+      }
+    } catch (error) {
+      console.error('Erro ao postar mensagem:', error)
+      alert('Erro ao postar mensagem. Tente novamente.')
+    } finally {
+      setIsPosting(false)
+    }
   }
 
   // Limpar todas as entradas
-  const clearAllEntries = () => {
-    if (confirm("Tem certeza que deseja apagar todas as mensagens?")) {
+  const clearAllEntries = async () => {
+    if (!confirm("Tem certeza que deseja apagar todas as mensagens?")) return
+
+    try {
+      const { error } = await supabase
+        .from('vlog_entries')
+        .delete()
+        .neq('id', '0') // Deletar todas as mensagens
+
+      if (error) {
+        console.error('Erro ao limpar mensagens:', error)
+        alert('Erro ao limpar mensagens. Tente novamente.')
+        return
+      }
+
       setVlogEntries([])
-      localStorage.removeItem("vlogEntries")
+      alert('Todas as mensagens foram removidas.')
+    } catch (error) {
+      console.error('Erro ao limpar mensagens:', error)
+      alert('Erro ao limpar mensagens. Tente novamente.')
     }
   }
 
@@ -170,7 +217,12 @@ export default function LoveDiary() {
           </div>
 
           {/* Lista de mensagens postadas - sempre visível */}
-          {vlogEntries.length > 0 && (
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground text-sm">Carregando mensagens...</p>
+            </div>
+          ) : vlogEntries.length > 0 ? (
             <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
                 <h4 className="font-semibold text-foreground text-center sm:text-left text-sm sm:text-base">Mensagens Postadas ({vlogEntries.length}):</h4>
@@ -213,10 +265,7 @@ export default function LoveDiary() {
                 ))}
               </div>
             </div>
-          )}
-
-          {/* Mensagem quando não há entradas */}
-          {vlogEntries.length === 0 && (
+          ) : (
             <div className="text-center py-4 sm:py-6 mb-4 sm:mb-6">
               <p className="text-muted-foreground text-sm sm:text-base">Nenhuma mensagem postada ainda... 💕</p>
             </div>

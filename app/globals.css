@@ -131,6 +131,11 @@
   .font-romantic {
     font-family: "Playfair Display", serif;
   }
+  
+  .font-montserrat-black {
+    font-family: var(--font-montserrat);
+    font-weight: 900;
+  }
 }
 
 /* Added custom animations for the romantic theme */

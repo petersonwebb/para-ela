@@ -33,7 +33,7 @@ export default function HomePage() {
         <div className="relative z-10 container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-center">
           {/* Texto à esquerda */}
           <div className="text-center lg:text-left animate-fade-in-up">
-            <h1 className="font-playfair text-5xl md:text-7xl lg:text-7xl xl:text-8xl text-primary mb-6 animate-float leading-tight">
+            <h1 className="font-montserrat-black text-5xl md:text-7xl lg:text-7xl xl:text-8xl text-primary mb-6 animate-float leading-tight">
               Bem-vinda
               <br className="hidden lg:block" />
               <span className="lg:hidden"> </span>

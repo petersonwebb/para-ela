@@ -2,13 +2,20 @@ import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
-import { Playfair_Display } from "next/font/google"
+import { Playfair_Display, Montserrat } from "next/font/google"
 import "./globals.css"
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-playfair",
+})
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-montserrat",
+  weight: ["900"], // Black weight
 })
 
 export const metadata: Metadata = {
@@ -24,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className="dark">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${playfairDisplay.variable}`}>
+      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${playfairDisplay.variable} ${montserrat.variable}`}>
         {children}
       </body>
     </html>

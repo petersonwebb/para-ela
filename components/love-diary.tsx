@@ -207,10 +207,10 @@ export default function LoveDiary() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-muted-foreground text-sm">Carregando mensagens...</p>
             </div>
-          ) : vlogEntries.length > 0 ? (
+          ) : (Array.isArray(vlogEntries) && vlogEntries.length > 0) ? (
             <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
-                <h4 className="font-semibold text-foreground text-center sm:text-left text-sm sm:text-base">Mensagens Postadas ({vlogEntries.length}):</h4>
+                <h4 className="font-semibold text-foreground text-center sm:text-left text-sm sm:text-base">Mensagens Postadas ({Array.isArray(vlogEntries) ? vlogEntries.length : 0}):</h4>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -400,7 +400,7 @@ export default function LoveDiary() {
                     🔒 Bloquear Área de Escrita
                   </Button>
                   <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    {vlogEntries.length > 0 && (
+                    {Array.isArray(vlogEntries) && vlogEntries.length > 0 && (
                       <Button
                         variant="outline"
                         size="sm"

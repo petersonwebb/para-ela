@@ -52,9 +52,8 @@ export default function HomePage() {
           {/* Card com vídeo à direita */}
           <div className="flex justify-center lg:justify-start">
             <div className="relative">
-              {/* Efeito neon rosinha */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 rounded-2xl blur-sm opacity-75 animate-neon-flow"></div>
-              <div className="absolute -inset-1 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 rounded-2xl blur-sm opacity-75 animate-neon-flow-reverse"></div>
+              {/* Fio neon rosinha fino */}
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 rounded-2xl opacity-100 animate-neon-border"></div>
               
               <div className="relative bg-background/90 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-primary/20 max-w-sm md:max-w-md lg:max-w-lg w-full">
                 <video

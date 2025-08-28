@@ -178,52 +178,24 @@
 }
 
 /* Animações neon para o card */
-@keyframes neon-flow {
+@keyframes neon-border {
   0% {
-    background: linear-gradient(90deg, #f472b6, #ec4899, #db2777);
-    transform: rotate(0deg);
+    background: linear-gradient(90deg, transparent 0%, #f472b6 25%, #ec4899 50%, #db2777 75%, transparent 100%);
   }
   25% {
-    background: linear-gradient(180deg, #f472b6, #ec4899, #db2777);
+    background: linear-gradient(180deg, transparent 0%, #f472b6 25%, #ec4899 50%, #db2777 75%, transparent 100%);
   }
   50% {
-    background: linear-gradient(270deg, #f472b6, #ec4899, #db2777);
-    transform: rotate(180deg);
+    background: linear-gradient(270deg, transparent 0%, #f472b6 25%, #ec4899 50%, #db2777 75%, transparent 100%);
   }
   75% {
-    background: linear-gradient(0deg, #f472b6, #ec4899, #db2777);
+    background: linear-gradient(0deg, transparent 0%, #f472b6 25%, #ec4899 50%, #db2777 75%, transparent 100%);
   }
   100% {
-    background: linear-gradient(90deg, #f472b6, #ec4899, #db2777);
-    transform: rotate(360deg);
+    background: linear-gradient(90deg, transparent 0%, #f472b6 25%, #ec4899 50%, #db2777 75%, transparent 100%);
   }
 }
 
-@keyframes neon-flow-reverse {
-  0% {
-    background: linear-gradient(270deg, #f472b6, #ec4899, #db2777);
-    transform: rotate(0deg);
-  }
-  25% {
-    background: linear-gradient(0deg, #f472b6, #ec4899, #db2777);
-  }
-  50% {
-    background: linear-gradient(90deg, #f472b6, #ec4899, #db2777);
-    transform: rotate(-180deg);
-  }
-  75% {
-    background: linear-gradient(180deg, #f472b6, #ec4899, #db2777);
-  }
-  100% {
-    background: linear-gradient(270deg, #f472b6, #ec4899, #db2777);
-    transform: rotate(-360deg);
-  }
-}
-
-.animate-neon-flow {
-  animation: neon-flow 4s linear infinite;
-}
-
-.animate-neon-flow-reverse {
-  animation: neon-flow-reverse 3s linear infinite;
+.animate-neon-border {
+  animation: neon-border 3s linear infinite;
 }

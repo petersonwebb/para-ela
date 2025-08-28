@@ -21,6 +21,7 @@ export default function LoveDiary() {
   const [password, setPassword] = useState("")
   const [showPasswordInput, setShowPasswordInput] = useState(false)
   const [isPosting, setIsPosting] = useState(false)
+  const [expandedImage, setExpandedImage] = useState<{src: string, content: string, date: string} | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -129,6 +130,11 @@ export default function LoveDiary() {
     }
   }
 
+  // Expandir imagem para visualização completa
+  const expandImage = (src: string, content: string, date: string) => {
+    setExpandedImage({ src, content, date })
+  }
+
   return (
     <section className="py-20 px-4">
       <div className="max-w-4xl mx-auto">
@@ -179,7 +185,8 @@ export default function LoveDiary() {
                         <img
                           src={entry.image}
                           alt="Imagem da mensagem"
-                          className="w-full max-h-48 object-cover rounded-lg"
+                          className="w-32 h-32 object-cover rounded-lg cursor-pointer hover:scale-105 transition-transform duration-200 border border-primary/20"
+                          onClick={() => expandImage(entry.image!, entry.content, entry.date)}
                         />
                       </div>
                     )}
@@ -340,6 +347,52 @@ export default function LoveDiary() {
             </div>
           )}
         </Card>
+
+        {/* Modal de Imagem Expandida */}
+        {expandedImage && (
+          <div
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+            onClick={() => setExpandedImage(null)}
+          >
+            <Card 
+              className="max-w-2xl w-full bg-card border-primary/20 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                {/* Cabeçalho com data e botão fechar */}
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-primary text-sm font-medium">{expandedImage.date}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setExpandedImage(null)}
+                    className="border-primary/20 text-primary hover:bg-primary/10"
+                  >
+                    ❌ Fechar
+                  </Button>
+                </div>
+                
+                {/* Imagem expandida */}
+                <div className="mb-4">
+                  <img
+                    src={expandedImage.src}
+                    alt="Imagem expandida"
+                    className="w-full h-auto max-h-[60vh] object-contain rounded-lg"
+                  />
+                </div>
+                
+                {/* Texto da mensagem */}
+                {expandedImage.content && (
+                  <div className="p-4 bg-background/30 rounded-lg border border-primary/10">
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                      {expandedImage.content}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
     </section>
   )

@@ -8,17 +8,21 @@ interface VlogEntry {
   id: string
   date: string
   content: string
+  image?: string
   timestamp: string
 }
 
 export default function LoveDiary() {
   const [vlogEntries, setVlogEntries] = useState<VlogEntry[]>([])
   const [newEntry, setNewEntry] = useState("")
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState("")
   const [showPasswordInput, setShowPasswordInput] = useState(false)
   const [isPosting, setIsPosting] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Carregar entradas salvas do localStorage
   useEffect(() => {
@@ -53,19 +57,20 @@ export default function LoveDiary() {
 
   // Postar nova entrada no vlog
   const postEntry = () => {
-    if (!newEntry.trim()) return
+    if (!newEntry.trim() && !selectedImage) return
 
     const entry: VlogEntry = {
       id: Date.now().toString(),
       date: new Date().toLocaleDateString("pt-BR"),
       content: newEntry.trim(),
+      image: imagePreview,
       timestamp: new Date().toLocaleString("pt-BR")
     }
 
     const updatedEntries = [entry, ...vlogEntries]
     setVlogEntries(updatedEntries)
     localStorage.setItem("vlogEntries", JSON.stringify(updatedEntries))
-    setNewEntry("")
+    clearForm()
     setIsPosting(true)
     
     // Mostrar confirmação temporariamente
@@ -77,6 +82,43 @@ export default function LoveDiary() {
     if (confirm("Tem certeza que deseja apagar todas as mensagens?")) {
       setVlogEntries([])
       localStorage.removeItem("vlogEntries")
+    }
+  }
+
+  // Gerenciar seleção de imagem
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert("A imagem deve ter menos de 5MB")
+        return
+      }
+      
+      setSelectedImage(file)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  // Remover imagem selecionada
+  const removeImage = () => {
+    setSelectedImage(null)
+    setImagePreview("")
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
+  // Limpar formulário
+  const clearForm = () => {
+    setNewEntry("")
+    setSelectedImage(null)
+    setImagePreview("")
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
     }
   }
 
@@ -94,8 +136,8 @@ export default function LoveDiary() {
             <iframe
               width="100%"
               height="200"
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0&volume=0.5&controls=1&loop=1&playlist=dQw4w9WgXcQ&enablejsapi=1"
-              title="Música de Fundo"
+              src="https://www.youtube.com/embed/hLX_Kl0EeIw?autoplay=1&mute=0&volume=0.5&controls=1&loop=1&playlist=hLX_Kl0EeIw&enablejsapi=1&rel=0"
+              title="Música Romântica de Fundo"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -125,7 +167,18 @@ export default function LoveDiary() {
                       <span className="text-xs text-primary font-medium">{entry.date}</span>
                       <span className="text-xs text-muted-foreground">{entry.timestamp.split(', ')[1]}</span>
                     </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">{entry.content}</p>
+                    {entry.image && (
+                      <div className="mb-3">
+                        <img
+                          src={entry.image}
+                          alt="Imagem da mensagem"
+                          className="w-full max-h-48 object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
+                    {entry.content && (
+                      <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">{entry.content}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -181,6 +234,49 @@ export default function LoveDiary() {
               {/* Área de escrita */}
               <div className="space-y-4">
                 <h4 className="font-semibold text-foreground">✍️ Escrever Nova Mensagem:</h4>
+                
+                {/* Upload de Imagem */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">📷 Anexar Imagem:</span>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-primary/20 text-primary hover:bg-primary/10"
+                    >
+                      🖼️ Selecionar Imagem
+                    </Button>
+                  </div>
+                  
+                  {/* Preview da Imagem */}
+                  {imagePreview && (
+                    <div className="relative">
+                      <img
+                        src={imagePreview}
+                        alt="Preview da imagem"
+                        className="w-full max-h-48 object-cover rounded-lg border border-primary/20"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={removeImage}
+                        className="absolute top-2 right-2 bg-red-500/80 text-white hover:bg-red-500 border-0"
+                      >
+                        ❌
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Campo de Texto */}
                 <textarea
                   ref={textareaRef}
                   value={newEntry}

@@ -27,13 +27,17 @@ export default function LoveDiary() {
   // Carregar entradas salvas do localStorage
   useEffect(() => {
     const saved = localStorage.getItem("vlogEntries")
+    console.log("Carregando do localStorage:", saved)
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
+        console.log("Entradas carregadas:", parsed)
         setVlogEntries(parsed)
       } catch (error) {
-        console.log("Nenhuma entrada salva encontrada")
+        console.log("Erro ao carregar entradas:", error)
       }
+    } else {
+      console.log("Nenhuma entrada salva encontrada")
     }
   }, [])
 
@@ -67,7 +71,10 @@ export default function LoveDiary() {
       timestamp: new Date().toLocaleString("pt-BR")
     }
 
+    console.log("Postando nova entrada:", entry)
     const updatedEntries = [entry, ...vlogEntries]
+    console.log("Entradas atualizadas:", updatedEntries)
+    
     setVlogEntries(updatedEntries)
     localStorage.setItem("vlogEntries", JSON.stringify(updatedEntries))
     clearForm()
@@ -159,7 +166,7 @@ export default function LoveDiary() {
           {/* Lista de mensagens postadas - sempre visível */}
           {vlogEntries.length > 0 && (
             <div className="space-y-4 mb-6">
-              <h4 className="font-semibold text-foreground">Mensagens Postadas:</h4>
+              <h4 className="font-semibold text-foreground">Mensagens Postadas ({vlogEntries.length}):</h4>
               <div className="space-y-3 max-h-60 overflow-y-auto">
                 {vlogEntries.map((entry) => (
                   <div key={entry.id} className="p-3 bg-background/30 rounded-lg border border-primary/10">
@@ -179,9 +186,19 @@ export default function LoveDiary() {
                     {entry.content && (
                       <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">{entry.content}</p>
                     )}
+                    {!entry.content && !entry.image && (
+                      <p className="text-muted-foreground text-sm italic">Mensagem sem conteúdo</p>
+                    )}
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Mensagem quando não há entradas */}
+          {vlogEntries.length === 0 && (
+            <div className="text-center py-6 mb-6">
+              <p className="text-muted-foreground">Nenhuma mensagem postada ainda... 💕</p>
             </div>
           )}
 

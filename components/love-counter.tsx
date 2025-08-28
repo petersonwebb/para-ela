@@ -14,7 +14,7 @@ export default function LoveCounter() {
   const [timeElapsed, setTimeElapsed] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 
   // Data de início do relacionamento - ajuste conforme necessário
-  const startDate = new Date("2023-01-01T00:00:00")
+  const startDate = new Date("2025-08-11T00:00:00")
 
   useEffect(() => {
     const calculateTime = () => {

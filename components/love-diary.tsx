@@ -3,16 +3,7 @@
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect, useRef } from "react"
-import { supabase } from "@/lib/supabase"
-
-interface VlogEntry {
-  id: string
-  date: string
-  content: string
-  image?: string
-  timestamp: string
-  created_at: string
-}
+import { loadMessagesFromGitHub, saveMessagesToGitHub, checkForUpdates, VlogEntry } from "@/lib/github-service"
 
 export default function LoveDiary() {
   const [vlogEntries, setVlogEntries] = useState<VlogEntry[]>([])
@@ -25,33 +16,54 @@ export default function LoveDiary() {
   const [isPosting, setIsPosting] = useState(false)
   const [expandedImage, setExpandedImage] = useState<{src: string, content: string, date: string} | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [lastSync, setLastSync] = useState<Date | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Carregar mensagens do Supabase
+  // Carregar mensagens do GitHub
   useEffect(() => {
-    fetchMessages()
+    loadMessagesFromGitHub()
   }, [])
 
-  // Buscar mensagens do banco de dados
-  const fetchMessages = async () => {
+  // Função para carregar mensagens
+  const loadMessagesFromGitHub = async () => {
     try {
       setIsLoading(true)
-      const { data, error } = await supabase
-        .from('vlog_entries')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Erro ao buscar mensagens:', error)
-        return
+      const messages = await loadMessagesFromGitHub()
+      setVlogEntries(messages)
+      setLastSync(new Date())
+      console.log('Mensagens carregadas com sucesso!')
+    } catch (error) {
+      console.error('Erro ao carregar mensagens:', error)
+      // Fallback para localStorage
+      const saved = localStorage.getItem("vlogEntries")
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          setVlogEntries(parsed)
+        } catch (e) {
+          console.error('Erro ao carregar do localStorage:', e)
+        }
       }
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-      if (data) {
-        setVlogEntries(data)
+  // Sincronizar com GitHub
+  const syncWithGitHub = async () => {
+    try {
+      setIsLoading(true)
+      const updatedMessages = await checkForUpdates(vlogEntries)
+      if (JSON.stringify(updatedMessages) !== JSON.stringify(vlogEntries)) {
+        setVlogEntries(updatedMessages)
+        setLastSync(new Date())
+        console.log('Sincronização realizada com sucesso!')
+      } else {
+        console.log('Nenhuma atualização encontrada')
       }
     } catch (error) {
-      console.error('Erro ao buscar mensagens:', error)
+      console.error('Erro na sincronização:', error)
     } finally {
       setIsLoading(false)
     }
@@ -79,65 +91,38 @@ export default function LoveDiary() {
   const postEntry = async () => {
     if (!newEntry.trim() && !selectedImage) return
 
-    try {
-      setIsPosting(true)
-      
-      const entry = {
-        content: newEntry.trim(),
-        image: imagePreview || null,
-        date: new Date().toLocaleDateString("pt-BR"),
-        timestamp: new Date().toLocaleString("pt-BR")
-      }
-
-      const { data, error } = await supabase
-        .from('vlog_entries')
-        .insert([entry])
-        .select()
-
-      if (error) {
-        console.error('Erro ao postar mensagem:', error)
-        alert('Erro ao postar mensagem. Tente novamente.')
-        return
-      }
-
-      if (data) {
-        // Atualizar a lista local
-        setVlogEntries([data[0], ...vlogEntries])
-        clearForm()
-        
-        // Mostrar confirmação
-        setTimeout(() => setIsPosting(false), 2000)
-      }
-    } catch (error) {
-      console.error('Erro ao postar mensagem:', error)
-      alert('Erro ao postar mensagem. Tente novamente.')
-    } finally {
-      setIsPosting(false)
+    const entry: VlogEntry = {
+      id: Date.now().toString(),
+      date: new Date().toLocaleDateString("pt-BR"),
+      content: newEntry.trim(),
+      image: imagePreview,
+      timestamp: new Date().toLocaleString("pt-BR")
     }
+
+    const updatedEntries = [entry, ...vlogEntries]
+    setVlogEntries(updatedEntries)
+    
+    // Salvar no GitHub
+    await saveMessagesToGitHub(updatedEntries)
+    
+    clearForm()
+    setIsPosting(true)
+    
+    // Mostrar confirmação temporariamente
+    setTimeout(() => setIsPosting(false), 2000)
   }
 
   // Limpar todas as entradas
   const clearAllEntries = async () => {
     if (!confirm("Tem certeza que deseja apagar todas as mensagens?")) return
 
-    try {
-      const { error } = await supabase
-        .from('vlog_entries')
-        .delete()
-        .neq('id', '0') // Deletar todas as mensagens
-
-      if (error) {
-        console.error('Erro ao limpar mensagens:', error)
-        alert('Erro ao limpar mensagens. Tente novamente.')
-        return
-      }
-
-      setVlogEntries([])
-      alert('Todas as mensagens foram removidas.')
-    } catch (error) {
-      console.error('Erro ao limpar mensagens:', error)
-      alert('Erro ao limpar mensagens. Tente novamente.')
-    }
+    setVlogEntries([])
+    localStorage.removeItem("vlogEntries")
+    
+    // Salvar no GitHub
+    await saveMessagesToGitHub([])
+    
+    alert('Todas as mensagens foram removidas.')
   }
 
   // Gerenciar seleção de imagem
@@ -230,11 +215,37 @@ export default function LoveDiary() {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={syncWithGitHub}
+                    disabled={isLoading}
+                    className="border-blue-500/20 text-blue-400 hover:bg-blue-500/10 px-2 py-1 text-xs"
+                  >
+                    🔄 Sincronizar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={clearAllEntries}
                     className="border-red-500/20 text-red-400 hover:bg-red-500/10 px-2 py-1 text-xs"
                   >
                     🗑️ Limpar Todas as Mensagens
                   </Button>
+                </div>
+              </div>
+              
+              {/* Status do GitHub */}
+              <div className="bg-background/30 rounded-lg p-2 border border-primary/10">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-400">🔗 GitHub Conectado</span>
+                    {lastSync && (
+                      <span className="text-muted-foreground">
+                        Última sinc: {lastSync.toLocaleTimeString('pt-BR')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-muted-foreground text-xs">
+                    petersonwebb/para-ela
+                  </div>
                 </div>
               </div>
               
@@ -267,7 +278,16 @@ export default function LoveDiary() {
             </div>
           ) : (
             <div className="text-center py-4 sm:py-6 mb-4 sm:mb-6">
-              <p className="text-muted-foreground text-sm sm:text-base">Nenhuma mensagem postada ainda... 💕</p>
+              <p className="text-muted-foreground text-sm sm:text-base mb-3">Nenhuma mensagem postada ainda... 💕</p>
+              <div className="bg-background/30 rounded-lg p-3 border border-primary/10">
+                <p className="text-muted-foreground text-xs mb-2">💡 <strong>Sistema GitHub Ativo:</strong></p>
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  Suas mensagens serão salvas no repositório GitHub e ficarão públicas para qualquer pessoa ver!
+                </p>
+                <p className="text-muted-foreground text-xs mt-2">
+                  <strong>Repositório:</strong> petersonwebb/para-ela
+                </p>
+              </div>
             </div>
           )}
 

@@ -114,16 +114,35 @@ export default function LoveDiary() {
             <div className="text-primary text-sm font-medium">{new Date().toLocaleDateString("pt-BR")}</div>
           </div>
 
+          {/* Lista de mensagens postadas - sempre visível */}
+          {vlogEntries.length > 0 && (
+            <div className="space-y-4 mb-6">
+              <h4 className="font-semibold text-foreground">Mensagens Postadas:</h4>
+              <div className="space-y-3 max-h-60 overflow-y-auto">
+                {vlogEntries.map((entry) => (
+                  <div key={entry.id} className="p-3 bg-background/30 rounded-lg border border-primary/10">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-xs text-primary font-medium">{entry.date}</span>
+                      <span className="text-xs text-muted-foreground">{entry.timestamp.split(', ')[1]}</span>
+                    </div>
+                    <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">{entry.content}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Área de autenticação e escrita */}
           {!isAuthenticated ? (
             <div className="space-y-4">
-              <div className="text-center py-8">
-                <p className="text-muted-foreground mb-4">🔒 Este vlog está protegido por senha</p>
+              <div className="text-center py-6">
+                <p className="text-muted-foreground mb-4">🔒 Para escrever uma nova mensagem, digite a senha</p>
                 {!showPasswordInput ? (
                   <Button
                     onClick={() => setShowPasswordInput(true)}
                     className="bg-primary text-primary-foreground hover:bg-primary/90"
                   >
-                    🔓 Digite a Senha
+                    ✍️ Escrever Nova Mensagem
                   </Button>
                 ) : (
                   <div className="space-y-3">
@@ -161,6 +180,7 @@ export default function LoveDiary() {
             <div className="space-y-6">
               {/* Área de escrita */}
               <div className="space-y-4">
+                <h4 className="font-semibold text-foreground">✍️ Escrever Nova Mensagem:</h4>
                 <textarea
                   ref={textareaRef}
                   value={newEntry}
@@ -174,15 +194,27 @@ export default function LoveDiary() {
                     onClick={() => setIsAuthenticated(false)}
                     className="border-primary/20 text-primary hover:bg-primary/10"
                   >
-                    🔒 Bloquear Vlog
+                    🔒 Bloquear Área de Escrita
                   </Button>
-                  <Button
-                    onClick={postEntry}
-                    disabled={!newEntry.trim()}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    📤 Postar Mensagem
-                  </Button>
+                  <div className="flex gap-2">
+                    {vlogEntries.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={clearAllEntries}
+                        className="border-red-500/20 text-red-400 hover:bg-red-500/10"
+                      >
+                        🗑️ Limpar Todas as Mensagens
+                      </Button>
+                    )}
+                    <Button
+                      onClick={postEntry}
+                      disabled={!newEntry.trim()}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      📤 Postar Mensagem
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -190,35 +222,6 @@ export default function LoveDiary() {
               {isPosting && (
                 <div className="p-3 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400 text-center animate-fade-in-up">
                   ✅ Mensagem postada com sucesso!
-                </div>
-              )}
-
-              {/* Lista de mensagens postadas */}
-              {vlogEntries.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-foreground">Mensagens Postadas:</h4>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={clearAllEntries}
-                      className="border-red-500/20 text-red-400 hover:bg-red-500/10 text-xs"
-                    >
-                      🗑️ Limpar Tudo
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-3 max-h-60 overflow-y-auto">
-                    {vlogEntries.map((entry) => (
-                      <div key={entry.id} className="p-3 bg-background/30 rounded-lg border border-primary/10">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-xs text-primary font-medium">{entry.date}</span>
-                          <span className="text-xs text-muted-foreground">{entry.timestamp.split(', ')[1]}</span>
-                        </div>
-                        <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">{entry.content}</p>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>

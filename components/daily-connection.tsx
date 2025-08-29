@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { saveMoodEntry, getMoodEntry, savePromptAnswer, getPromptAnswer, getUserName } from "@/lib/database"
 
 const prompts = [
   "Qual foi o momento mais doce do seu dia?",
@@ -21,18 +22,64 @@ export default function DailyConnection() {
   const [mood, setMood] = useState<string | null>(null)
   const [answer, setAnswer] = useState("")
   const [promptIndex, setPromptIndex] = useState(0)
+  const [userName, setUserName] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [saveMessage, setSaveMessage] = useState("")
 
   useEffect(() => {
-    const keyMood = todayKey("mood")
-    const keyAnswer = todayKey("prompt")
-    setMood(localStorage.getItem(keyMood))
-    setAnswer(localStorage.getItem(keyAnswer) || "")
-    setPromptIndex(new Date().getDate() % prompts.length)
+    const loadData = async () => {
+      const user = getUserName()
+      setUserName(user)
+      setPromptIndex(new Date().getDate() % prompts.length)
+      
+      try {
+        // Carregar mood do dia
+        const moodData = await getMoodEntry(user)
+        if (moodData) {
+          setMood(moodData.mood)
+        }
+        
+        // Carregar resposta do prompt
+        const promptData = await getPromptAnswer(user)
+        if (promptData) {
+          setAnswer(promptData.answer)
+        }
+      } catch (error) {
+        console.log("Primeira vez do usuário ou erro ao carregar:", error)
+      }
+    }
+    
+    loadData()
   }, [])
 
-  const save = () => {
-    localStorage.setItem(todayKey("mood"), mood || "")
-    localStorage.setItem(todayKey("prompt"), answer)
+  const saveMood = async (selectedMood: string) => {
+    setMood(selectedMood)
+    try {
+      await saveMoodEntry(userName, selectedMood)
+      setSaveMessage("Humor salvo! 💕")
+      setTimeout(() => setSaveMessage(""), 2000)
+    } catch (error) {
+      console.error("Erro ao salvar humor:", error)
+      setSaveMessage("Erro ao salvar 😔")
+      setTimeout(() => setSaveMessage(""), 2000)
+    }
+  }
+
+  const savePrompt = async () => {
+    if (!answer.trim()) return
+    
+    setSaving(true)
+    try {
+      await savePromptAnswer(userName, prompts[promptIndex], answer)
+      setSaveMessage("Resposta salva! ❤️")
+      setTimeout(() => setSaveMessage(""), 2000)
+    } catch (error) {
+      console.error("Erro ao salvar resposta:", error)
+      setSaveMessage("Erro ao salvar 😔")
+      setTimeout(() => setSaveMessage(""), 2000)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -49,11 +96,14 @@ export default function DailyConnection() {
               { v: "empolgado", l: "🤩 Empolgado" },
               { v: "cansado", l: "😴 Cansado" },
             ].map((m) => (
-              <Button key={m.v} variant={mood === m.v ? "default" : "outline"} size="sm" onClick={() => setMood(m.v)}>
+              <Button key={m.v} variant={mood === m.v ? "default" : "outline"} size="sm" onClick={() => saveMood(m.v)}>
                 {m.l}
               </Button>
             ))}
           </div>
+          {saveMessage && (
+            <div className="mt-2 text-sm text-green-600 text-center">{saveMessage}</div>
+          )}
         </Card>
 
         <Card className="p-6 md:p-8 card-elegant">
@@ -66,9 +116,20 @@ export default function DailyConnection() {
             className="w-full h-24 p-2 bg-background/50 border border-primary/20 rounded-lg"
           />
           <div className="mt-2 text-right">
-            <Button onClick={save}>Salvar de hoje</Button>
+            <Button onClick={savePrompt} disabled={saving || !answer.trim()}>
+              {saving ? "Salvando..." : "Salvar de hoje"}
+            </Button>
           </div>
+          {saveMessage && (
+            <div className="mt-2 text-sm text-green-600 text-center">{saveMessage}</div>
+          )}
         </Card>
+
+        {userName && (
+          <div className="text-center text-sm text-muted-foreground">
+            Logado como: {userName} ❤️
+          </div>
+        )}
       </div>
     </section>
   )

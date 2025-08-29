@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { saveTreasureProgress, getTreasureProgress, getUserName } from "@/lib/database"
 
 const clues = [
   "Pista 1: Qual foi a primeira música que te enviei? (letras minúsculas)",
@@ -16,30 +17,52 @@ export default function TreasureHunt() {
   const [progress, setProgress] = useState(0)
   const [input, setInput] = useState("")
   const [unlocked, setUnlocked] = useState(false)
+  const [userName, setUserName] = useState("")
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    const saved = parseInt(localStorage.getItem("treasure:progress") || "0", 10)
-    setProgress(saved)
-    setUnlocked(localStorage.getItem("treasure:unlocked") === "1")
+    const loadData = async () => {
+      const user = getUserName()
+      setUserName(user)
+      
+      try {
+        const treasureData = await getTreasureProgress(user)
+        if (treasureData) {
+          setProgress(treasureData.progress)
+          setUnlocked(treasureData.unlocked)
+        }
+      } catch (error) {
+        console.log("Primeira vez do usuário ou erro ao carregar:", error)
+      }
+    }
+    
+    loadData()
   }, [])
 
-  const next = () => {
+  const next = async () => {
     if (!input.trim()) return
-    // neste protótipo, a última etapa pede o código "amor"
-    if (progress < clues.length - 1) {
-      setProgress((p) => {
-        const np = p + 1
-        localStorage.setItem("treasure:progress", String(np))
-        return np
-      })
-      setInput("")
-    } else {
-      if (input.trim().toLowerCase() === secretCode) {
-        setUnlocked(true)
-        localStorage.setItem("treasure:unlocked", "1")
+    
+    setSaving(true)
+    try {
+      // neste protótipo, a última etapa pede o código "amor"
+      if (progress < clues.length - 1) {
+        const newProgress = progress + 1
+        setProgress(newProgress)
+        await saveTreasureProgress(userName, newProgress, false)
+        setInput("")
       } else {
-        alert("Quase! Tente outra palavra carinhosa.")
+        if (input.trim().toLowerCase() === secretCode) {
+          setUnlocked(true)
+          await saveTreasureProgress(userName, progress, true)
+        } else {
+          alert("Quase! Tente outra palavra carinhosa.")
+        }
       }
+    } catch (error) {
+      console.error("Erro ao salvar progresso:", error)
+      alert("Erro ao salvar progresso. Tente novamente.")
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -58,7 +81,9 @@ export default function TreasureHunt() {
                 className="w-full px-3 py-2 bg-background/50 border border-primary/20 rounded-lg text-sm"
               />
               <div className="mt-3">
-                <Button onClick={next}>Enviar</Button>
+                <Button onClick={next} disabled={saving || !input.trim()}>
+                  {saving ? "Verificando..." : "Enviar"}
+                </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-2">Progresso: {progress + 1}/{clues.length}</p>
             </>

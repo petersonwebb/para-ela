@@ -51,26 +51,21 @@ export default function ReactionsPanel() {
   }
 
   const react = async (type: Reaction) => {
+    console.log('Botão clicado!', type)
+    
     if (!userName) {
-      console.error('Nome do usuário não definido')
+      alert('Aguarde, carregando usuário...')
       return
     }
 
     try {
       console.log(`Enviando reação ${type} do usuário ${userName}`)
       
-      // Salvar reação no GitHub
-      const newReaction = await saveReaction(type, userName)
-      console.log('Reação salva:', newReaction)
-      
-      // Atualizar estado local
-      setReactions(prev => [...prev, newReaction])
-      
-      // Efeito visual
+      // Efeito visual imediato
       const container = burstRef.current
       if (container) {
         const el = document.createElement("div")
-        el.className = "pointer-events-none absolute inset-0 flex items-center justify-center animate-bounce"
+        el.className = "pointer-events-none absolute inset-0 flex items-center justify-center animate-bounce z-10"
         el.innerHTML = `<span class="text-4xl select-none">${type === "heart" ? "❤️" : type === "rose" ? "🌹" : "🤗"}</span>`
         container.appendChild(el)
         setTimeout(() => {
@@ -80,9 +75,16 @@ export default function ReactionsPanel() {
         }, 1000)
       }
       
+      // Salvar reação no GitHub
+      const newReaction = await saveReaction(type, userName)
+      console.log('Reação salva:', newReaction)
+      
+      // Atualizar estado local
+      setReactions(prev => [...prev, newReaction])
+      
     } catch (error) {
       console.error('Erro ao enviar reação:', error)
-      alert('Não foi possível enviar a reação. Tente novamente.')
+      alert('Erro ao enviar reação: ' + error)
     }
   }
 
@@ -145,8 +147,8 @@ export default function ReactionsPanel() {
           </Card>
         )}
 
-        <Card className="relative p-6 md:p-8 card-elegant overflow-hidden">
-          <div ref={burstRef} className="absolute inset-0" />
+        <Card className="relative p-6 md:p-8 card-elegant">
+          <div ref={burstRef} className="absolute inset-0 pointer-events-none" />
           
           {isLoading ? (
             <div className="text-center py-8">
@@ -155,31 +157,28 @@ export default function ReactionsPanel() {
             </div>
           ) : (
             <>
-              <div className="flex flex-wrap gap-3 justify-center mb-4">
-                <Button 
+              <div className="flex flex-wrap gap-4 justify-center mb-4">
+                <button 
                   onClick={() => react("heart")} 
-                  variant="default" 
-                  className="bg-red-500 hover:bg-red-600 cursor-pointer"
-                  disabled={!userName || isLoading}
+                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors cursor-pointer font-medium text-sm border-0 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   Enviar ❤️ ({counts.heart})
-                </Button>
-                <Button 
+                </button>
+                <button 
                   onClick={() => react("rose")} 
-                  variant="outline" 
-                  className="border-pink-500 text-pink-500 hover:bg-pink-500/10 cursor-pointer"
-                  disabled={!userName || isLoading}
+                  className="px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors cursor-pointer font-medium text-sm border-0 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   Enviar 🌹 ({counts.rose})
-                </Button>
-                <Button 
+                </button>
+                <button 
                   onClick={() => react("hug")} 
-                  variant="outline" 
-                  className="border-yellow-500 text-yellow-500 hover:bg-yellow-500/10 cursor-pointer"
-                  disabled={!userName || isLoading}
+                  className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors cursor-pointer font-medium text-sm border-0 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   Enviar 🤗 ({counts.hug})
-                </Button>
+                </button>
               </div>
               
               <div className="text-center space-y-2">

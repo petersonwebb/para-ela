@@ -46,7 +46,7 @@ export default function SharedArtCanvas() {
     <section className="py-16 px-4">
       <div className="max-w-4xl mx-auto space-y-4">
         <h2 className="font-playfair text-3xl md:text-4xl text-primary text-center">Quadro de arte a dois</h2>
-        <Card className="p-3 md:p-4 bg-card/50 backdrop-blur-sm border-primary/20">
+        <Card className="p-6 md:p-8 card-elegant">
           <div className="flex items-center gap-3 mb-3">
             <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
             <input type="range" min={2} max={24} value={size} onChange={(e) => setSize(parseInt(e.target.value))} />

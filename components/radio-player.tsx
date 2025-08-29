@@ -132,7 +132,7 @@ export default function RadioPlayer({ compact = false }: RadioPlayerProps) {
   }
 
   const content = (
-    <Card className={compact ? "p-2 bg-card/60 backdrop-blur-sm border-primary/20" : "p-4 md:p-6 bg-card/50 backdrop-blur-sm border-primary/20"}>
+    <Card className={compact ? "p-3 card-elegant" : "p-6 md:p-8 card-elegant"}>
       <div className={compact ? "flex items-center gap-2" : "flex flex-col gap-4"}>
         <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" onClick={prev} aria-label="Anterior" disabled={controlsDisabled}>

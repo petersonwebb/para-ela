@@ -41,27 +41,27 @@ export default function LoveCounter() {
         <h2 className="font-playfair text-4xl md:text-5xl text-primary mb-8 animate-fade-in-up">Nosso Tempo Juntos</h2>
         <p className="text-muted-foreground mb-12 text-lg">Cada segundo ao seu lado é precioso</p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <Card className="p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <Card className="p-8 card-elegant">
             <div className="text-3xl md:text-4xl font-bold text-primary mb-2 animate-heartbeat">{timeElapsed.days}</div>
             <div className="text-sm text-muted-foreground uppercase tracking-wider">Dias</div>
           </Card>
 
-          <Card className="p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300">
+          <Card className="p-8 card-elegant">
             <div className="text-3xl md:text-4xl font-bold text-primary mb-2 animate-heartbeat">
               {timeElapsed.hours}
             </div>
             <div className="text-sm text-muted-foreground uppercase tracking-wider">Horas</div>
           </Card>
 
-          <Card className="p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300">
+          <Card className="p-8 card-elegant">
             <div className="text-3xl md:text-4xl font-bold text-primary mb-2 animate-heartbeat">
               {timeElapsed.minutes}
             </div>
             <div className="text-sm text-muted-foreground uppercase tracking-wider">Minutos</div>
           </Card>
 
-          <Card className="p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300">
+          <Card className="p-8 card-elegant">
             <div className="text-3xl md:text-4xl font-bold text-primary mb-2 animate-heartbeat">
               {timeElapsed.seconds}
             </div>

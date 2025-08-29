@@ -57,7 +57,7 @@ export default function TimelineGallery() {
           {timelineData.map((item, index) => (
             <Card
               key={item.id}
-              className="group cursor-pointer overflow-hidden bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300 hover:scale-105"
+              className="group cursor-pointer overflow-hidden card-elegant hover:scale-105"
               onClick={() => setSelectedItem(item)}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
@@ -82,7 +82,7 @@ export default function TimelineGallery() {
             className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
             onClick={() => setSelectedItem(null)}
           >
-            <Card className="max-w-2xl w-full bg-card border-primary/20">
+            <Card className="max-w-2xl w-full card-elegant">
               <div className="aspect-[16/10] overflow-hidden">
                 <img
                   src={selectedItem.image || "/placeholder.svg"}

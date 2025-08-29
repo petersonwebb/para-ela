@@ -35,7 +35,7 @@ export default function PhotoCarousel({ photos = defaultPhotos }: { photos?: Pho
   }, [emblaApi, onSelect])
 
   return (
-    <Card className="p-2 md:p-4 bg-card/50 backdrop-blur-sm border-primary/20">
+    <Card className="p-4 md:p-6 card-elegant">
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
           {photos.map((photo, idx) => (

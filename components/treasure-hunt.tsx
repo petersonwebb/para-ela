@@ -47,7 +47,7 @@ export default function TreasureHunt() {
     <section className="py-16 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <h2 className="font-playfair text-3xl md:text-4xl text-primary text-center">Caça ao tesouro digital</h2>
-        <Card className="p-4 md:p-6 bg-card/50 backdrop-blur-sm border-primary/20">
+        <Card className="p-6 md:p-8 card-elegant">
           {!unlocked ? (
             <>
               <p className="text-sm text-muted-foreground mb-3">{clues[progress]}</p>

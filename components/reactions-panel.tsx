@@ -43,7 +43,7 @@ export default function ReactionsPanel() {
     <section className="py-16 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <h2 className="font-playfair text-3xl md:text-4xl text-primary text-center">Reações (mesmo offline)</h2>
-        <Card className="relative p-4 md:p-6 bg-card/50 backdrop-blur-sm border-primary/20 overflow-hidden">
+        <Card className="relative p-6 md:p-8 card-elegant overflow-hidden">
           <div ref={burstRef} className="absolute inset-0" />
           <div className="flex flex-wrap gap-3 justify-center">
             <Button onClick={() => react("heart")} variant="default">Enviar ❤️ ({hearts})</Button>

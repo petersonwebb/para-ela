@@ -223,7 +223,7 @@ export default function LoveDiary() {
         </div>
 
         {/* Sistema de Vlog com Senha */}
-        <Card className="p-3 sm:p-4 md:p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300">
+        <Card className="p-6 sm:p-8 md:p-10 card-elegant">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
             <div className="flex items-center gap-3">
               <span className="text-2xl">📝</span>

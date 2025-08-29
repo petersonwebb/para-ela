@@ -13,7 +13,13 @@ export interface VlogEntry {
 // Carregar mensagens do GitHub
 export const loadMessagesFromGitHub = async (): Promise<VlogEntry[]> => {
   try {
-    const response = await fetch(getMessagesUrl())
+    console.log('Tentando carregar mensagens do GitHub...');
+    const url = getMessagesUrl();
+    console.log('URL do GitHub:', url);
+    
+    const response = await fetch(url)
+    console.log('Resposta do GitHub:', response.status, response.statusText);
+    
     if (!response.ok) {
       console.log('Arquivo de mensagens não encontrado, retornando array vazio')
       return []
@@ -28,19 +34,40 @@ export const loadMessagesFromGitHub = async (): Promise<VlogEntry[]> => {
   }
 }
 
-// Salvar mensagens no GitHub (simulado - você precisará de um token de acesso)
+// Salvar mensagens no GitHub
 export const saveMessagesToGitHub = async (messages: VlogEntry[]): Promise<boolean> => {
   try {
-    // Salvar no localStorage como backup
-    localStorage.setItem('vlogEntries', JSON.stringify(messages))
-
-    // INTEGRAÇÃO AUTOMÁTICA COM GITHUB
-    // ATENÇÃO: Insira seu token de acesso pessoal do GitHub abaixo
+    console.log('Tentando salvar mensagens:', messages);
+    
     // Salvar no localStorage como backup
     localStorage.setItem('vlogEntries', JSON.stringify(messages));
+    console.log('Mensagens salvas no localStorage');
 
-    // Enviar para Netlify Function
+    // Tentar usar a API local primeiro (para desenvolvimento)
     try {
+      console.log('Tentando usar API local...');
+      const response = await fetch('/api/save-vlog-messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(messages)
+      });
+      
+      if (response.ok) {
+        console.log('Mensagens salvas via API local!');
+        return true;
+      } else {
+        const error = await response.json();
+        console.error('Erro na API local:', error);
+      }
+    } catch (error) {
+      console.log('API local não disponível, tentando Netlify Function...');
+    }
+
+    // Tentar usar Netlify Function (para produção)
+    try {
+      console.log('Tentando usar Netlify Function...');
       const response = await fetch('/.netlify/functions/save-vlog-messages', {
         method: 'POST',
         headers: {
@@ -48,22 +75,26 @@ export const saveMessagesToGitHub = async (messages: VlogEntry[]): Promise<boole
         },
         body: JSON.stringify(messages)
       });
-      if (!response.ok) {
+      
+      if (response.ok) {
+        console.log('Mensagens salvas via Netlify Function!');
+        return true;
+      } else {
         const error = await response.json();
-        console.error('Erro ao salvar no GitHub:', error);
-        alert('Erro ao salvar no GitHub. Veja o console para detalhes.');
-        return false;
+        console.error('Erro na Netlify Function:', error);
+        console.log('Token do GitHub não configurado. Mensagens salvas apenas localmente.');
+        alert('Mensagens salvas localmente. Para salvar no GitHub, configure o token no Netlify.');
+        return true; // Retorna true mesmo assim para não bloquear o usuário
       }
-      console.log('Mensagens salvas automaticamente no GitHub!');
-      return true;
     } catch (error) {
-      console.error('Erro ao salvar mensagens:', error);
-      alert('Erro ao salvar no GitHub. Veja o console para detalhes.');
-      return false;
+      console.error('Erro ao acessar Netlify Function:', error);
+      console.log('Mensagens salvas apenas localmente.');
+      alert('Mensagens salvas localmente. Para salvar no GitHub, configure o token no Netlify.');
+      return true; // Retorna true mesmo assim para não bloquear o usuário
     }
   } catch (error) {
-    console.error('Erro ao salvar mensagens:', error);
-    alert('Erro ao salvar no GitHub. Veja o console para detalhes.');
+    console.error('Erro geral ao salvar mensagens:', error);
+    alert('Erro ao salvar mensagens. Veja o console para detalhes.');
     return false;
   }
 }

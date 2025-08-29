@@ -22,11 +22,11 @@ export default function LoveDiary() {
 
   // Carregar mensagens do GitHub
   useEffect(() => {
-    loadMessagesFromGitHub()
+    loadMessages()
   }, [])
 
   // Função para carregar mensagens
-  const loadMessagesFromGitHub = async () => {
+  const loadMessages = async () => {
     try {
       setIsLoading(true)
       const messages = await loadMessagesFromGitHub()
@@ -53,6 +53,7 @@ export default function LoveDiary() {
   // Sincronizar com GitHub
   const syncWithGitHub = async () => {
     try {
+      console.log('Iniciando sincronização...');
       setIsLoading(true)
       const updatedMessages = await checkForUpdates(vlogEntries)
       if (JSON.stringify(updatedMessages) !== JSON.stringify(vlogEntries)) {
@@ -89,8 +90,13 @@ export default function LoveDiary() {
 
   // Postar nova entrada no vlog
   const postEntry = async () => {
-    if (!newEntry.trim() && !selectedImage) return
+    if (!newEntry.trim() && !selectedImage) {
+      alert('Digite uma mensagem ou selecione uma imagem!');
+      return;
+    }
 
+    console.log('Iniciando postagem da mensagem...');
+    
     const entry: VlogEntry = {
       id: Date.now().toString(),
       date: new Date().toLocaleDateString("pt-BR"),
@@ -99,16 +105,23 @@ export default function LoveDiary() {
       timestamp: new Date().toLocaleString("pt-BR")
     }
 
+    console.log('Nova entrada criada:', entry);
+
     const updatedEntries = [entry, ...vlogEntries]
+    
     // Salvar no GitHub
+    console.log('Tentando salvar no GitHub...');
     const success = await saveMessagesToGitHub(updatedEntries)
+    
     if (success) {
+      console.log('Mensagem salva com sucesso!');
       setVlogEntries(updatedEntries)
       clearForm()
       setIsPosting(true)
       // Mostrar confirmação temporariamente
-      setTimeout(() => setIsPosting(false), 2000)
+      setTimeout(() => setIsPosting(false), 3000)
     } else {
+      console.error('Falha ao salvar mensagem');
       alert('Não foi possível postar a mensagem. Tente novamente.');
     }
   }

@@ -18,18 +18,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Buscar SHA atual do arquivo
-    const fileRes = await fetch(getApiUrl(), {
-      headers: {
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-    const fileData = await fileRes.json();
-    const sha = fileData.sha;
-
-    // Atualizar arquivo no GitHub
-    const updateRes = await fetch(getApiUrl(), {
+    console.log('Recriando arquivo no GitHub com mensagens:', messages);
+    
+    // Criar arquivo no GitHub (sem verificar SHA existente)
+    const createRes = await fetch(getApiUrl(), {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${GITHUB_TOKEN}`,
@@ -37,17 +29,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        message: 'Atualizando mensagens do vlog via integração automática',
-        content: Buffer.from(JSON.stringify(messages, null, 2), 'utf8').toString('base64'),
-        sha: sha
+        message: 'Recriando arquivo vlog-messages.json (arquivo corrompido)',
+        content: Buffer.from(JSON.stringify(messages, null, 2), 'utf8').toString('base64')
       })
     });
-    if (!updateRes.ok) {
-      const errorText = await updateRes.text();
-      return res.status(500).json({ error: 'Erro ao salvar no GitHub', details: errorText });
+    
+    if (!createRes.ok) {
+      const errorText = await createRes.text();
+      console.error('Erro ao recriar arquivo:', errorText);
+      return res.status(500).json({ error: 'Erro ao recriar arquivo no GitHub', details: errorText });
     }
-    return res.status(200).json({ success: true });
+    
+    console.log('Arquivo recriado com sucesso!');
+    return res.status(200).json({ success: true, message: 'Arquivo recriado com sucesso' });
   } catch (error) {
-    return res.status(500).json({ error: 'Erro ao salvar mensagens', details: String(error) });
+    console.error('Erro ao recriar arquivo:', error);
+    return res.status(500).json({ error: 'Erro ao recriar arquivo', details: String(error) });
   }
 }

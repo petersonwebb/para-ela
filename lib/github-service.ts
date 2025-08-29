@@ -25,7 +25,51 @@ export const loadMessagesFromGitHub = async (): Promise<VlogEntry[]> => {
       return []
     }
     
-    const messages = await response.json()
+    // Primeiro, pegar o texto bruto para debug
+    const rawText = await response.text();
+    console.log('Texto bruto recebido:', rawText);
+    
+    // Tentar fazer parse do JSON
+    let messages;
+    try {
+      messages = JSON.parse(rawText);
+    } catch (parseError) {
+      console.error('Erro ao fazer parse do JSON:', parseError);
+      console.log('Conteúdo recebido que causou erro:', rawText);
+      
+      // Se o arquivo estiver vazio ou com apenas espaços, retornar array vazio
+      if (!rawText.trim()) {
+        console.log('Arquivo vazio, retornando array vazio');
+        return [];
+      }
+      
+      // Tentar limpar o conteúdo
+      const cleanedText = rawText.trim();
+      try {
+        messages = JSON.parse(cleanedText);
+      } catch (secondError) {
+        console.error('Erro mesmo após limpeza:', secondError);
+        console.log('Arquivo no GitHub está corrompido. Tentando recriar...');
+        
+        // Tentar recriar o arquivo com conteúdo do localStorage
+        const savedMessages = localStorage.getItem('vlogEntries');
+        if (savedMessages) {
+          try {
+            const parsedMessages = JSON.parse(savedMessages);
+            const success = await recreateGitHubFile(parsedMessages);
+            if (success) {
+              console.log('Arquivo recriado com sucesso!');
+              return parsedMessages;
+            }
+          } catch (e) {
+            console.error('Erro ao recriar arquivo:', e);
+          }
+        }
+        
+        return [];
+      }
+    }
+    
     console.log('Mensagens carregadas do GitHub:', messages)
     return Array.isArray(messages) ? messages : []
   } catch (error) {
@@ -51,7 +95,7 @@ export const saveMessagesToGitHub = async (messages: VlogEntry[]): Promise<boole
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(messages)
+        body: JSON.stringify(messages, null, 2) // Formatar JSON com indentação
       });
       
       if (response.ok) {
@@ -73,7 +117,7 @@ export const saveMessagesToGitHub = async (messages: VlogEntry[]): Promise<boole
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(messages)
+        body: JSON.stringify(messages, null, 2) // Formatar JSON com indentação
       });
       
       if (response.ok) {
@@ -114,5 +158,53 @@ export const checkForUpdates = async (currentMessages: VlogEntry[]): Promise<Vlo
   } catch (error) {
     console.error('Erro ao verificar atualizações:', error)
     return currentMessages
+  }
+}
+
+// Função para recriar o arquivo no GitHub (caso esteja corrompido)
+export const recreateGitHubFile = async (messages: VlogEntry[]): Promise<boolean> => {
+  try {
+    console.log('Tentando recriar arquivo no GitHub...');
+    
+    // Tentar usar a API local primeiro
+    try {
+      const response = await fetch('/api/recreate-vlog-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(messages, null, 2)
+      });
+      
+      if (response.ok) {
+        console.log('Arquivo recriado via API local!');
+        return true;
+      }
+    } catch (error) {
+      console.log('API local não disponível para recriação');
+    }
+    
+    // Tentar usar Netlify Function
+    try {
+      const response = await fetch('/.netlify/functions/recreate-vlog-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(messages, null, 2)
+      });
+      
+      if (response.ok) {
+        console.log('Arquivo recriado via Netlify Function!');
+        return true;
+      }
+    } catch (error) {
+      console.log('Netlify Function não disponível para recriação');
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Erro ao recriar arquivo:', error);
+    return false;
   }
 }

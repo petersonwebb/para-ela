@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect, useRef } from "react"
-import { loadMessagesFromGitHub, saveMessagesToGitHub, checkForUpdates, VlogEntry } from "@/lib/github-service"
+import { loadMessagesFromGitHub, saveMessagesToGitHub, checkForUpdates, recreateGitHubFile, VlogEntry } from "@/lib/github-service"
 
 export default function LoveDiary() {
   const [vlogEntries, setVlogEntries] = useState<VlogEntry[]>([])
@@ -67,6 +67,33 @@ export default function LoveDiary() {
       console.error('Erro na sincronização:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Forçar recriação do arquivo no GitHub
+  const forceRecreateFile = async () => {
+    if (!confirm('Tem certeza que deseja recriar o arquivo no GitHub? Isso pode resolver problemas de sincronização.')) {
+      return;
+    }
+    
+    try {
+      console.log('Forçando recriação do arquivo...');
+      setIsLoading(true);
+      
+      const success = await recreateGitHubFile(vlogEntries);
+      if (success) {
+        console.log('Arquivo recriado com sucesso!');
+        alert('Arquivo recriado com sucesso! Agora as mensagens devem aparecer em outros dispositivos.');
+        setLastSync(new Date());
+      } else {
+        console.error('Falha ao recriar arquivo');
+        alert('Não foi possível recriar o arquivo. Verifique o console para detalhes.');
+      }
+    } catch (error) {
+      console.error('Erro ao recriar arquivo:', error);
+      alert('Erro ao recriar arquivo. Verifique o console para detalhes.');
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -225,25 +252,34 @@ export default function LoveDiary() {
             <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
                 <h4 className="font-semibold text-foreground text-center sm:text-left text-sm sm:text-base">Mensagens Postadas ({Array.isArray(vlogEntries) ? vlogEntries.length : 0}):</h4>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={syncWithGitHub}
-                    disabled={isLoading}
-                    className="border-blue-500/20 text-blue-400 hover:bg-blue-500/10 px-2 py-1 text-xs"
-                  >
-                    🔄 Sincronizar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={clearAllEntries}
-                    className="border-red-500/20 text-red-400 hover:bg-red-500/10 px-2 py-1 text-xs"
-                  >
-                    🗑️ Limpar Todas as Mensagens
-                  </Button>
-                </div>
+                                 <div className="flex gap-2">
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={syncWithGitHub}
+                     disabled={isLoading}
+                     className="border-blue-500/20 text-blue-400 hover:bg-blue-500/10 px-2 py-1 text-xs"
+                   >
+                     🔄 Sincronizar
+                   </Button>
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={forceRecreateFile}
+                     disabled={isLoading}
+                     className="border-orange-500/20 text-orange-400 hover:bg-orange-500/10 px-2 py-1 text-xs"
+                   >
+                     🔧 Recriar Arquivo
+                   </Button>
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={clearAllEntries}
+                     className="border-red-500/20 text-red-400 hover:bg-red-500/10 px-2 py-1 text-xs"
+                   >
+                     🗑️ Limpar Todas as Mensagens
+                   </Button>
+                 </div>
               </div>
               
               {/* Status do GitHub */}

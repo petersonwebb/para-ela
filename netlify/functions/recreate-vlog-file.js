@@ -37,18 +37,10 @@ exports.handler = async function(event, context) {
   const apiUrl = `https://api.github.com/repos/${username}/${repository}/contents/${filePath}`;
 
   try {
-    // Buscar SHA atual do arquivo
-    const fileRes = await fetch(apiUrl, {
-      headers: {
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-    const fileData = await fileRes.json();
-    const sha = fileData.sha;
-
-    // Atualizar arquivo no GitHub
-    const updateRes = await fetch(apiUrl, {
+    console.log('Recriando arquivo no GitHub com mensagens:', messages);
+    
+    // Criar arquivo no GitHub (sem verificar SHA existente)
+    const createRes = await fetch(apiUrl, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${GITHUB_TOKEN}`,
@@ -56,26 +48,30 @@ exports.handler = async function(event, context) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        message: 'Atualizando mensagens do vlog via Netlify Function',
-        content: Buffer.from(JSON.stringify(messages, null, 2), 'utf8').toString('base64'),
-        sha: sha
+        message: 'Recriando arquivo vlog-messages.json (arquivo corrompido)',
+        content: Buffer.from(JSON.stringify(messages, null, 2), 'utf8').toString('base64')
       })
     });
-    if (!updateRes.ok) {
-      const errorText = await updateRes.text();
+    
+    if (!createRes.ok) {
+      const errorText = await createRes.text();
+      console.error('Erro ao recriar arquivo:', errorText);
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: 'Erro ao salvar no GitHub', details: errorText })
+        body: JSON.stringify({ error: 'Erro ao recriar arquivo no GitHub', details: errorText })
       };
     }
+    
+    console.log('Arquivo recriado com sucesso!');
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true })
+      body: JSON.stringify({ success: true, message: 'Arquivo recriado com sucesso' })
     };
   } catch (error) {
+    console.error('Erro ao recriar arquivo:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Erro ao salvar mensagens', details: String(error) })
+      body: JSON.stringify({ error: 'Erro ao recriar arquivo', details: String(error) })
     };
   }
 };

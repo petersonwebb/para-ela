@@ -5,6 +5,7 @@ import Preloader from "@/components/preloader"
 import LoveCounter from "@/components/love-counter"
 import TimelineGallery from "@/components/timeline-gallery"
 import LoveDiary from "@/components/love-diary"
+import RadioPlayer from "@/components/radio-player"
 
 export default function HomePage() {
   const [showPreloader, setShowPreloader] = useState(true)

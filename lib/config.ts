@@ -17,8 +17,14 @@ export const SUPABASE_CONFIG = {
 // Adicione aqui URLs de áudio diretas (mp3/ogg) ou streams (Icecast/SHOUTcast)
 // Dica: Coloque arquivos .mp3 em /public e referencie como "/minha-musica.mp3"
 export const RADIO_PLAYLIST: string[] = [
-  // "/minha-musica-1.mp3",
-  // "/minha-musica-2.mp3",
+  "/song1.mp3",
+  "/song2.mp3",
+  "/song3.mp3",
+  "/song4.mp3",
+  "/song5.mp3",
+  "/song6.mp3",
+  "/song7.mp3",
+  "/song8.mp3",
 ]
 
 export const RADIO_SETTINGS = {

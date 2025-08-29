@@ -6,6 +6,11 @@ import LoveCounter from "@/components/love-counter"
 import TimelineGallery from "@/components/timeline-gallery"
 import LoveDiary from "@/components/love-diary"
 import RadioPlayer from "@/components/radio-player"
+import MiniGames from "@/components/mini-games"
+import DailyConnection from "@/components/daily-connection"
+import ReactionsPanel from "@/components/reactions-panel"
+import SharedArtCanvas from "@/components/shared-art-canvas"
+import TreasureHunt from "@/components/treasure-hunt"
 
 export default function HomePage() {
   const [showPreloader, setShowPreloader] = useState(true)
@@ -100,6 +105,21 @@ export default function HomePage() {
 
       {/* Love Diary Section */}
       <LoveDiary />
+
+      {/* Daily connection */}
+      <DailyConnection />
+
+      {/* Mini games */}
+      <MiniGames />
+
+      {/* Reactions */}
+      <ReactionsPanel />
+
+      {/* Shared art canvas */}
+      <SharedArtCanvas />
+
+      {/* Treasure hunt */}
+      <TreasureHunt />
 
       {/* Footer */}
       <footer className="py-12 px-4 bg-background/80 backdrop-blur-sm border-t border-primary/20">

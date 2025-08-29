@@ -1,13 +1,13 @@
 import { supabase } from './supabase'
 import { SUPABASE_CONFIG } from './config'
 import { 
-  saveFirebaseMoodEntry, 
-  getFirebaseMoodEntry,
-  saveFirebaseTreasureProgress,
-  getFirebaseTreasureProgress,
-  saveFirebaseArtCanvas,
-  getFirebaseLatestArtCanvas
-} from './firebase-simple'
+  saveGitHubMoodEntry, 
+  getGitHubMoodEntry,
+  saveGitHubTreasureProgress,
+  getGitHubTreasureProgress,
+  saveGitHubArtCanvas,
+  getGitHubLatestArtCanvas
+} from './github-storage'
 
 // Tipos para o banco de dados
 export interface MoodEntry {
@@ -57,11 +57,11 @@ const getFromLocalStorage = (key: string) => {
 
 // Funções para mood check-in
 export async function saveMoodEntry(userName: string, mood: string) {
-  // Prioridade: Firebase > Supabase > localStorage
+  // Prioridade: GitHub > Supabase > localStorage
   try {
-    return await saveFirebaseMoodEntry(userName, mood)
+    return await saveGitHubMoodEntry(userName, mood)
   } catch (error) {
-    console.log('Firebase falhou, tentando Supabase...')
+    console.log('GitHub falhou, tentando Supabase...')
     
     if (isSupabaseConfigured()) {
       try {
@@ -93,12 +93,12 @@ export async function saveMoodEntry(userName: string, mood: string) {
 }
 
 export async function getMoodEntry(userName: string, date?: string) {
-  // Prioridade: Firebase > Supabase > localStorage
+  // Prioridade: GitHub > Supabase > localStorage
   try {
-    const data = await getFirebaseMoodEntry(userName, date)
+    const data = await getGitHubMoodEntry(userName, date)
     if (data) return data
   } catch (error) {
-    console.log('Firebase falhou, tentando Supabase...')
+    console.log('GitHub falhou, tentando Supabase...')
   }
   
   const targetDate = date || new Date().toISOString().split('T')[0]
@@ -127,11 +127,11 @@ export async function getMoodEntry(userName: string, date?: string) {
 
 // Funções para caça ao tesouro
 export async function saveTreasureProgress(userName: string, progress: number, unlocked: boolean) {
-  // Prioridade: Firebase > Supabase > localStorage
+  // Prioridade: GitHub > Supabase > localStorage
   try {
-    return await saveFirebaseTreasureProgress(userName, progress, unlocked)
+    return await saveGitHubTreasureProgress(userName, progress, unlocked)
   } catch (error) {
-    console.log('Firebase falhou, tentando Supabase...')
+    console.log('GitHub falhou, tentando Supabase...')
     
     if (isSupabaseConfigured()) {
       try {
@@ -164,12 +164,12 @@ export async function saveTreasureProgress(userName: string, progress: number, u
 }
 
 export async function getTreasureProgress(userName: string, date?: string) {
-  // Prioridade: Firebase > Supabase > localStorage
+  // Prioridade: GitHub > Supabase > localStorage
   try {
-    const data = await getFirebaseTreasureProgress(userName, date)
+    const data = await getGitHubTreasureProgress(userName, date)
     if (data) return data
   } catch (error) {
-    console.log('Firebase falhou, tentando Supabase...')
+    console.log('GitHub falhou, tentando Supabase...')
   }
   
   const targetDate = date || new Date().toISOString().split('T')[0]
@@ -197,11 +197,11 @@ export async function getTreasureProgress(userName: string, date?: string) {
 
 // Funções para quadro de arte
 export async function saveArtCanvas(canvasData: string, createdBy: string) {
-  // Prioridade: Firebase > Supabase > localStorage
+  // Prioridade: GitHub > Supabase > localStorage
   try {
-    return await saveFirebaseArtCanvas(canvasData, createdBy)
+    return await saveGitHubArtCanvas(canvasData, createdBy)
   } catch (error) {
-    console.log('Firebase falhou, tentando Supabase...')
+    console.log('GitHub falhou, tentando Supabase...')
     
     if (isSupabaseConfigured()) {
       try {
@@ -231,12 +231,12 @@ export async function saveArtCanvas(canvasData: string, createdBy: string) {
 }
 
 export async function getLatestArtCanvas() {
-  // Prioridade: Firebase > Supabase > localStorage
+  // Prioridade: GitHub > Supabase > localStorage
   try {
-    const data = await getFirebaseLatestArtCanvas()
+    const data = await getGitHubLatestArtCanvas()
     if (data) return data
   } catch (error) {
-    console.log('Firebase falhou, tentando Supabase...')
+    console.log('GitHub falhou, tentando Supabase...')
   }
   
   if (isSupabaseConfigured()) {

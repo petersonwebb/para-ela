@@ -10,10 +10,18 @@ type Photo = {
 }
 
 const defaultPhotos: Photo[] = [
-  { src: "/foto1.jpg", alt: "Foto 1" },
-  { src: "/foto2.jpg", alt: "Foto 2" },
-  { src: "/foto3.jpg", alt: "Foto 3" },
-  { src: "/foto4.jpg", alt: "Foto 4" },
+  { src: "/po1.jpg", alt: "Foto 1" },
+  { src: "/po2.jpg", alt: "Foto 2" },
+  { src: "/po3.jpg", alt: "Foto 3" },
+  { src: "/po4.jpg", alt: "Foto 4" },
+  { src: "/po5.jpg", alt: "Foto 5" },
+  { src: "/po6.jpg", alt: "Foto 6" },
+  { src: "/po7.jpg", alt: "Foto 7" },
+  { src: "/po8.jpg", alt: "Foto 8" },
+  { src: "/po9.jpg", alt: "Foto 9" },
+  { src: "/po10.jpg", alt: "Foto 10" },
+  { src: "/po11.jpg", alt: "Foto 11" },
+  { src: "/po12.jpg", alt: "Foto 12" },
 ]
 
 export default function PhotoCarousel({ photos = defaultPhotos }: { photos?: Photo[] }) {

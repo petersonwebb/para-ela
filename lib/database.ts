@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { SUPABASE_CONFIG } from './config'
 
 // Tipos para o banco de dados
 export interface MoodEntry {
@@ -8,7 +9,6 @@ export interface MoodEntry {
   date: string
   created_at?: string
 }
-
 
 export interface TreasureProgress {
   id?: string
@@ -26,36 +26,85 @@ export interface ArtCanvas {
   created_at?: string
 }
 
+// Verificar se Supabase está configurado
+const isSupabaseConfigured = () => {
+  return SUPABASE_CONFIG.url !== 'https://your-project.supabase.co' && 
+         SUPABASE_CONFIG.anonKey !== 'your-anon-key'
+}
+
+// Funções de fallback para localStorage
+const saveToLocalStorage = (key: string, data: any) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(key, JSON.stringify(data))
+  }
+}
+
+const getFromLocalStorage = (key: string) => {
+  if (typeof window !== 'undefined') {
+    const data = localStorage.getItem(key)
+    return data ? JSON.parse(data) : null
+  }
+  return null
+}
+
 // Funções para mood check-in
 export async function saveMoodEntry(userName: string, mood: string) {
   const today = new Date().toISOString().split('T')[0]
   
-  const { data, error } = await supabase
-    .from('mood_entries')
-    .upsert({
-      user_name: userName,
-      mood,
-      date: today
-    }, {
-      onConflict: 'user_name,date'
-    })
+  if (!isSupabaseConfigured()) {
+    // Fallback para localStorage
+    const key = `mood_${userName}_${today}`
+    const data = { user_name: userName, mood, date: today, created_at: new Date().toISOString() }
+    saveToLocalStorage(key, data)
+    return data
+  }
   
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('mood_entries')
+      .upsert({
+        user_name: userName,
+        mood,
+        date: today
+      }, {
+        onConflict: 'user_name,date'
+      })
+    
+    if (error) throw error
+    return data
+  } catch (error) {
+    // Fallback para localStorage se Supabase falhar
+    const key = `mood_${userName}_${today}`
+    const data = { user_name: userName, mood, date: today, created_at: new Date().toISOString() }
+    saveToLocalStorage(key, data)
+    return data
+  }
 }
 
 export async function getMoodEntry(userName: string, date?: string) {
   const targetDate = date || new Date().toISOString().split('T')[0]
   
-  const { data, error } = await supabase
-    .from('mood_entries')
-    .select('*')
-    .eq('user_name', userName)
-    .eq('date', targetDate)
-    .single()
+  if (!isSupabaseConfigured()) {
+    // Fallback para localStorage
+    const key = `mood_${userName}_${targetDate}`
+    return getFromLocalStorage(key)
+  }
   
-  if (error && error.code !== 'PGRST116') throw error
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('mood_entries')
+      .select('*')
+      .eq('user_name', userName)
+      .eq('date', targetDate)
+      .single()
+    
+    if (error && error.code !== 'PGRST116') throw error
+    return data
+  } catch (error) {
+    // Fallback para localStorage se Supabase falhar
+    const key = `mood_${userName}_${targetDate}`
+    return getFromLocalStorage(key)
+  }
 }
 
 
@@ -63,61 +112,117 @@ export async function getMoodEntry(userName: string, date?: string) {
 export async function saveTreasureProgress(userName: string, progress: number, unlocked: boolean) {
   const today = new Date().toISOString().split('T')[0]
   
-  const { data, error } = await supabase
-    .from('treasure_progress')
-    .upsert({
-      user_name: userName,
-      progress,
-      unlocked,
-      date: today
-    }, {
-      onConflict: 'user_name,date'
-    })
+  if (!isSupabaseConfigured()) {
+    // Fallback para localStorage
+    const key = `treasure_${userName}_${today}`
+    const data = { user_name: userName, progress, unlocked, date: today, created_at: new Date().toISOString() }
+    saveToLocalStorage(key, data)
+    return data
+  }
   
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('treasure_progress')
+      .upsert({
+        user_name: userName,
+        progress,
+        unlocked,
+        date: today
+      }, {
+        onConflict: 'user_name,date'
+      })
+    
+    if (error) throw error
+    return data
+  } catch (error) {
+    // Fallback para localStorage se Supabase falhar
+    const key = `treasure_${userName}_${today}`
+    const data = { user_name: userName, progress, unlocked, date: today, created_at: new Date().toISOString() }
+    saveToLocalStorage(key, data)
+    return data
+  }
 }
 
 export async function getTreasureProgress(userName: string, date?: string) {
   const targetDate = date || new Date().toISOString().split('T')[0]
   
-  const { data, error } = await supabase
-    .from('treasure_progress')
-    .select('*')
-    .eq('user_name', userName)
-    .eq('date', targetDate)
-    .single()
+  if (!isSupabaseConfigured()) {
+    // Fallback para localStorage
+    const key = `treasure_${userName}_${targetDate}`
+    return getFromLocalStorage(key)
+  }
   
-  if (error && error.code !== 'PGRST116') throw error
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('treasure_progress')
+      .select('*')
+      .eq('user_name', userName)
+      .eq('date', targetDate)
+      .single()
+    
+    if (error && error.code !== 'PGRST116') throw error
+    return data
+  } catch (error) {
+    // Fallback para localStorage se Supabase falhar
+    const key = `treasure_${userName}_${targetDate}`
+    return getFromLocalStorage(key)
+  }
 }
 
 // Funções para quadro de arte
 export async function saveArtCanvas(canvasData: string, createdBy: string) {
-  // Primeiro, deletar o desenho anterior (só um por vez)
-  await supabase.from('art_canvas').delete().neq('id', 0)
+  if (!isSupabaseConfigured()) {
+    // Fallback para localStorage
+    const key = 'latest_art_canvas'
+    const data = { canvas_data: canvasData, created_by: createdBy, created_at: new Date().toISOString() }
+    saveToLocalStorage(key, data)
+    return data
+  }
   
-  const { data, error } = await supabase
-    .from('art_canvas')
-    .insert({
-      canvas_data: canvasData,
-      created_by: createdBy
-    })
-  
-  if (error) throw error
-  return data
+  try {
+    // Primeiro, deletar o desenho anterior (só um por vez)
+    await supabase.from('art_canvas').delete().neq('id', 0)
+    
+    const { data, error } = await supabase
+      .from('art_canvas')
+      .insert({
+        canvas_data: canvasData,
+        created_by: createdBy
+      })
+    
+    if (error) throw error
+    return data
+  } catch (error) {
+    // Fallback para localStorage se Supabase falhar
+    const key = 'latest_art_canvas'
+    const data = { canvas_data: canvasData, created_by: createdBy, created_at: new Date().toISOString() }
+    saveToLocalStorage(key, data)
+    return data
+  }
 }
 
 export async function getLatestArtCanvas() {
-  const { data, error } = await supabase
-    .from('art_canvas')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
+  if (!isSupabaseConfigured()) {
+    // Fallback para localStorage
+    const key = 'latest_art_canvas'
+    return getFromLocalStorage(key)
+  }
   
-  if (error && error.code !== 'PGRST116') throw error
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('art_canvas')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+    
+    if (error && error.code !== 'PGRST116') throw error
+    return data
+  } catch (error) {
+    // Fallback para localStorage se Supabase falhar
+    const key = 'latest_art_canvas'
+    return getFromLocalStorage(key)
+  }
 }
 
 // Função para obter nome do usuário (simples identificação)

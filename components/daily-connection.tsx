@@ -56,8 +56,8 @@ export default function DailyConnection() {
           </div>
         </Card>
 
-        <Card className="p-4 md:p-6 bg-card/50 backdrop-blur-sm border-primary/20">
-          <h3 className="font-semibold mb-3">Prompt do dia</h3>
+        <Card className="p-6 md:p-8 card-elegant">
+          <h3 className="font-semibold mb-4">Prompt do dia</h3>
           <p className="text-sm text-muted-foreground mb-3">{prompts[promptIndex]}</p>
           <textarea
             value={answer}

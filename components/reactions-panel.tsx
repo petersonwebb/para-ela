@@ -19,12 +19,17 @@ export default function ReactionsPanel() {
   const [reactions, setReactions] = useState<ReactionData[]>([])
   const [newReactions, setNewReactions] = useState<ReactionData[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [userName, setUserName] = useState<string>("")
   const burstRef = useRef<HTMLDivElement>(null)
-  const userName = getUserName()
 
-  // Carregar reações do GitHub
+  // Inicializar usuário e carregar reações
   useEffect(() => {
-    loadReactions()
+    const initializeUser = () => {
+      const user = getUserName()
+      setUserName(user)
+      loadReactions()
+    }
+    initializeUser()
   }, [])
 
   const loadReactions = async () => {
@@ -46,21 +51,34 @@ export default function ReactionsPanel() {
   }
 
   const react = async (type: Reaction) => {
+    if (!userName) {
+      console.error('Nome do usuário não definido')
+      return
+    }
+
     try {
+      console.log(`Enviando reação ${type} do usuário ${userName}`)
+      
       // Salvar reação no GitHub
       const newReaction = await saveReaction(type, userName)
+      console.log('Reação salva:', newReaction)
       
       // Atualizar estado local
       setReactions(prev => [...prev, newReaction])
       
       // Efeito visual
       const container = burstRef.current
-      if (!container) return
-      const el = document.createElement("div")
-      el.className = "pointer-events-none absolute inset-0 flex items-center justify-center animate-bounce"
-      el.innerHTML = `<span class="text-4xl select-none">${type === "heart" ? "❤️" : type === "rose" ? "🌹" : "🤗"}</span>`
-      container.appendChild(el)
-      setTimeout(() => container.removeChild(el), 1000)
+      if (container) {
+        const el = document.createElement("div")
+        el.className = "pointer-events-none absolute inset-0 flex items-center justify-center animate-bounce"
+        el.innerHTML = `<span class="text-4xl select-none">${type === "heart" ? "❤️" : type === "rose" ? "🌹" : "🤗"}</span>`
+        container.appendChild(el)
+        setTimeout(() => {
+          if (container.contains(el)) {
+            container.removeChild(el)
+          }
+        }, 1000)
+      }
       
     } catch (error) {
       console.error('Erro ao enviar reação:', error)
@@ -138,13 +156,28 @@ export default function ReactionsPanel() {
           ) : (
             <>
               <div className="flex flex-wrap gap-3 justify-center mb-4">
-                <Button onClick={() => react("heart")} variant="default" className="bg-red-500 hover:bg-red-600">
+                <Button 
+                  onClick={() => react("heart")} 
+                  variant="default" 
+                  className="bg-red-500 hover:bg-red-600 cursor-pointer"
+                  disabled={!userName || isLoading}
+                >
                   Enviar ❤️ ({counts.heart})
                 </Button>
-                <Button onClick={() => react("rose")} variant="outline" className="border-pink-500 text-pink-500 hover:bg-pink-500/10">
+                <Button 
+                  onClick={() => react("rose")} 
+                  variant="outline" 
+                  className="border-pink-500 text-pink-500 hover:bg-pink-500/10 cursor-pointer"
+                  disabled={!userName || isLoading}
+                >
                   Enviar 🌹 ({counts.rose})
                 </Button>
-                <Button onClick={() => react("hug")} variant="outline" className="border-yellow-500 text-yellow-500 hover:bg-yellow-500/10">
+                <Button 
+                  onClick={() => react("hug")} 
+                  variant="outline" 
+                  className="border-yellow-500 text-yellow-500 hover:bg-yellow-500/10 cursor-pointer"
+                  disabled={!userName || isLoading}
+                >
                   Enviar 🤗 ({counts.hug})
                 </Button>
               </div>

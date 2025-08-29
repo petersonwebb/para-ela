@@ -26,6 +26,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const animationRef = useRef<number>()
   const particles = useRef<Particle[]>([])
   const startTime = useRef<number>(Date.now())
+  const [showLoveText, setShowLoveText] = useState(false)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -42,21 +43,21 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     resizeCanvas()
     window.addEventListener("resize", resizeCanvas)
 
-    // Create initial fire explosion
+    // Create initial fire explosion (mais prolongado)
     const createFireExplosion = () => {
       const centerX = canvas.width / 2
       const centerY = canvas.height / 2
 
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 90; i++) {
         const angle = (Math.PI * 2 * i) / 50
-        const speed = Math.random() * 8 + 4
+        const speed = Math.random() * 7 + 3
         particles.current.push({
           x: centerX,
           y: centerY,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           life: 1,
-          maxLife: 60,
+          maxLife: 110,
           size: Math.random() * 8 + 4,
           type: "fire",
           color: `hsl(${Math.random() * 60 + 10}, 100%, ${Math.random() * 30 + 50}%)`,
@@ -66,21 +67,21 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       }
     }
 
-    // Create flower particles
+    // Create flower particles (chuva de rosas mais longa)
     const createFlowerParticles = () => {
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 45; i++) {
         particles.current.push({
           x: Math.random() * canvas.width,
           y: -20,
-          vx: (Math.random() - 0.5) * 2,
-          vy: Math.random() * 2 + 1,
+          vx: (Math.random() - 0.5) * 1.6,
+          vy: Math.random() * 1.6 + 0.8,
           life: 1,
-          maxLife: 200,
+          maxLife: 320,
           size: Math.random() * 15 + 10,
           type: "flower",
           color: `hsl(${Math.random() * 30 + 330}, 70%, 80%)`,
           angle: Math.random() * Math.PI * 2,
-          rotationSpeed: (Math.random() - 0.5) * 0.1,
+          rotationSpeed: (Math.random() - 0.5) * 0.08,
         })
       }
     }
@@ -128,13 +129,13 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       ctx.fillStyle = "rgba(26, 26, 26, 0.1)"
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Create fire explosion at start
-      if (elapsed < 500 && particles.current.filter((p) => p.type === "fire").length === 0) {
+      // Create fire explosion at start (janela maior)
+      if (elapsed < 900 && particles.current.filter((p) => p.type === "fire").length === 0) {
         createFireExplosion()
       }
 
-      // Create flowers after 1 second
-      if (elapsed > 1000 && elapsed < 2500 && Math.random() < 0.3) {
+      // Create flowers por mais tempo
+      if (elapsed > 1200 && elapsed < 5200 && Math.random() < 0.35) {
         createFlowerParticles()
       }
 
@@ -146,8 +147,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         particle.angle += particle.rotationSpeed
 
         if (particle.type === "fire") {
-          particle.vy += 0.1 // gravity
-          particle.vx *= 0.98 // friction
+          particle.vy += 0.08 // gravity
+          particle.vx *= 0.985 // friction
 
           const alpha = particle.life
           ctx.globalAlpha = alpha
@@ -157,8 +158,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           ctx.arc(particle.x, particle.y, radius, 0, Math.PI * 2)
           ctx.fill()
         } else {
-          particle.vy += 0.05 // gentle gravity for flowers
-          particle.vx *= 0.99
+          particle.vy += 0.035 // gentle gravity for flowers
+          particle.vx *= 0.992
 
           const alpha = Math.min(particle.life, 0.8)
           ctx.globalAlpha = alpha
@@ -171,14 +172,19 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
       ctx.globalAlpha = 1
 
-      // End animation after 3 seconds
-      if (elapsed < 3000) {
+      // Mostrar texto "Eu te amo" antes de encerrar
+      if (!showLoveText && elapsed > 5200) {
+        setShowLoveText(true)
+      }
+
+      // End animation after ~7s
+      if (elapsed < 7000) {
         animationRef.current = requestAnimationFrame(animate)
       } else {
         setTimeout(() => {
           setIsVisible(false)
           setTimeout(onComplete, 500)
-        }, 500)
+        }, 800)
       }
     }
 
@@ -198,8 +204,14 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
       <canvas ref={canvasRef} className="absolute inset-0" style={{ background: "#1a1a1a" }} />
       <div className="relative z-10 text-center">
-        <h1 className="font-playfair text-4xl md:text-6xl text-primary animate-heartbeat">❤️</h1>
-        <p className="text-foreground/70 mt-4 animate-fade-in-up">Carregando nosso amor...</p>
+        {!showLoveText ? (
+          <>
+            <h1 className="font-playfair text-4xl md:text-6xl text-primary animate-heartbeat">❤️</h1>
+            <p className="text-foreground/70 mt-4 animate-fade-in-up">Carregando nosso amor...</p>
+          </>
+        ) : (
+          <h2 className="font-playfair text-4xl md:text-6xl text-primary animate-fade-in-up">Eu te amo</h2>
+        )}
       </div>
     </div>
   )

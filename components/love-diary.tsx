@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect, useRef } from "react"
 import { loadMessagesFromGitHub, saveMessagesToGitHub, checkForUpdates, recreateGitHubFile, VlogEntry } from "@/lib/github-service"
+import PhotoCarousel from "@/components/photo-carousel"
 
 export default function LoveDiary() {
   const [vlogEntries, setVlogEntries] = useState<VlogEntry[]>([])
@@ -216,20 +217,9 @@ export default function LoveDiary() {
         </h2>
         <p className="text-muted-foreground text-center mb-12 text-lg">Aprecie com todo amor</p>
 
-        {/* Player de YouTube */}
-        <div className="flex justify-center mb-12">
-          <div className="w-full max-w-md">
-                         <iframe
-               width="100%"
-               height="200"
-               src="https://www.youtube.com/embed/HWVlxMwx8KY?autoplay=1&mute=0&volume=0.5&controls=1&loop=1&playlist=45ebKDLXmWg&enablejsapi=1&rel=0"
-               title="Música Romântica de Fundo"
-               frameBorder="0"
-               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-               allowFullScreen
-               className="rounded-lg shadow-lg"
-             />
-          </div>
+        {/* Álbum de Fotos (Carrossel) */}
+        <div className="mb-12">
+          <PhotoCarousel />
         </div>
 
         {/* Sistema de Vlog com Senha */}

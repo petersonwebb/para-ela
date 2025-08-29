@@ -104,6 +104,23 @@ export default function RadioPlayer({ compact = false }: RadioPlayerProps) {
   }, [hasTracks, play])
 
   useEffect(() => {
+    // Fallback: primeira interação do usuário dispara o play
+    const handler = () => {
+      if (!isPlaying && hasTracks) {
+        void play()
+      }
+      window.removeEventListener("pointerdown", handler)
+      window.removeEventListener("keydown", handler)
+    }
+    window.addEventListener("pointerdown", handler)
+    window.addEventListener("keydown", handler)
+    return () => {
+      window.removeEventListener("pointerdown", handler)
+      window.removeEventListener("keydown", handler)
+    }
+  }, [isPlaying, hasTracks, play])
+
+  useEffect(() => {
     // When track changes, try to play immediately
     if (audioRef.current && isPlaying) {
       void audioRef.current.play()

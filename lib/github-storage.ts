@@ -11,6 +11,13 @@ interface CoupleData {
   moods: Record<string, any>
   treasures: Record<string, any>
   artCanvas: any
+  reactions: Array<{
+    id: string
+    type: string
+    from_user: string
+    created_at: string
+    seen: boolean
+  }>
   lastUpdated: string
 }
 
@@ -31,6 +38,7 @@ async function fetchCoupleData(): Promise<CoupleData> {
       moods: {},
       treasures: {},
       artCanvas: null,
+      reactions: [],
       lastUpdated: new Date().toISOString()
     };
   }
@@ -149,25 +157,23 @@ export async function getGitHubTreasureProgress(userName: string, date?: string)
   }
 }
 
-// Funções para art canvas
+// Funções para quadro de arte
 export async function saveGitHubArtCanvas(canvasData: string, createdBy: string) {
   try {
     const coupleData = await fetchCoupleData();
+    
+    // Substituir o desenho anterior (só um por vez)
     coupleData.artCanvas = {
       canvas_data: canvasData,
       created_by: createdBy,
       created_at: new Date().toISOString()
-    };
-    await saveCoupleData(coupleData);
-    return coupleData.artCanvas;
-  } catch (error) {
-    // Fallback para localStorage
-    const localKey = 'latest_art_canvas';
-    const data = { canvas_data: canvasData, created_by: createdBy, created_at: new Date().toISOString() };
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(localKey, JSON.stringify(data));
     }
-    throw error;
+    
+    await saveCoupleData(coupleData)
+    return coupleData.artCanvas
+  } catch (error) {
+    console.error('Erro ao salvar arte no GitHub:', error)
+    throw error
   }
 }
 
@@ -183,5 +189,63 @@ export async function getGitHubLatestArtCanvas() {
       return data ? JSON.parse(data) : null;
     }
     return null;
+  }
+}
+
+// Funções para reações
+export async function saveGitHubReaction(reactionType: string, fromUser: string) {
+  try {
+    const coupleData = await fetchCoupleData()
+    
+    // Inicializar reações se não existir
+    if (!coupleData.reactions) {
+      coupleData.reactions = []
+    }
+    
+    // Adicionar nova reação
+    const newReaction = {
+      id: Date.now().toString(),
+      type: reactionType,
+      from_user: fromUser,
+      created_at: new Date().toISOString(),
+      seen: false
+    }
+    
+    coupleData.reactions.push(newReaction)
+    
+    await saveCoupleData(coupleData)
+    return newReaction
+  } catch (error) {
+    console.error('Erro ao salvar reação no GitHub:', error)
+    throw error
+  }
+}
+
+export async function getGitHubReactions() {
+  try {
+    const coupleData = await fetchCoupleData()
+    return coupleData.reactions || []
+  } catch (error) {
+    console.error('Erro ao buscar reações do GitHub:', error)
+    throw error
+  }
+}
+
+export async function markGitHubReactionAsSeen(reactionId: string) {
+  try {
+    const coupleData = await fetchCoupleData()
+    
+    if (coupleData.reactions) {
+      const reaction = coupleData.reactions.find(r => r.id === reactionId)
+      if (reaction) {
+        reaction.seen = true
+        await saveCoupleData(coupleData)
+      }
+    }
+    
+    return true
+  } catch (error) {
+    console.error('Erro ao marcar reação como vista no GitHub:', error)
+    throw error
   }
 }

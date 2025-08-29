@@ -6,7 +6,10 @@ import {
   saveGitHubTreasureProgress,
   getGitHubTreasureProgress,
   saveGitHubArtCanvas,
-  getGitHubLatestArtCanvas
+  getGitHubLatestArtCanvas,
+  saveGitHubReaction,
+  getGitHubReactions,
+  markGitHubReactionAsSeen
 } from './github-storage'
 
 // Tipos para o banco de dados
@@ -258,6 +261,62 @@ export async function getLatestArtCanvas() {
   // Fallback final para localStorage
   const key = 'latest_art_canvas'
   return getFromLocalStorage(key)
+}
+
+// Funções para reações
+export async function saveReaction(reactionType: string, fromUser: string) {
+  // Prioridade: GitHub > localStorage
+  try {
+    return await saveGitHubReaction(reactionType, fromUser)
+  } catch (error) {
+    console.log('GitHub falhou, usando localStorage')
+    
+    // Fallback para localStorage
+    const key = 'reactions'
+    const reactions = getFromLocalStorage(key) || []
+    const newReaction = {
+      id: Date.now().toString(),
+      type: reactionType,
+      from_user: fromUser,
+      created_at: new Date().toISOString(),
+      seen: false
+    }
+    reactions.push(newReaction)
+    saveToLocalStorage(key, reactions)
+    return newReaction
+  }
+}
+
+export async function getReactions() {
+  // Prioridade: GitHub > localStorage
+  try {
+    return await getGitHubReactions()
+  } catch (error) {
+    console.log('GitHub falhou, usando localStorage')
+    
+    // Fallback para localStorage
+    const key = 'reactions'
+    return getFromLocalStorage(key) || []
+  }
+}
+
+export async function markReactionAsSeen(reactionId: string) {
+  // Prioridade: GitHub > localStorage
+  try {
+    return await markGitHubReactionAsSeen(reactionId)
+  } catch (error) {
+    console.log('GitHub falhou, usando localStorage')
+    
+    // Fallback para localStorage
+    const key = 'reactions'
+    const reactions = getFromLocalStorage(key) || []
+    const reaction = reactions.find((r: any) => r.id === reactionId)
+    if (reaction) {
+      reaction.seen = true
+      saveToLocalStorage(key, reactions)
+    }
+    return true
+  }
 }
 
 // Função para obter nome do usuário (simples identificação)

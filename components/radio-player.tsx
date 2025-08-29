@@ -28,6 +28,7 @@ export default function RadioPlayer({ compact = false }: RadioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const hasTracks = tracks.length > 0
+  const controlsDisabled = !hasTracks
 
   const order = useMemo(() => {
     const base = tracks.map((_, index) => index)
@@ -117,19 +118,19 @@ export default function RadioPlayer({ compact = false }: RadioPlayerProps) {
     <Card className={compact ? "p-2 bg-card/60 backdrop-blur-sm border-primary/20" : "p-4 md:p-6 bg-card/50 backdrop-blur-sm border-primary/20"}>
       <div className={compact ? "flex items-center gap-2" : "flex flex-col gap-4"}>
         <div className="flex items-center gap-3">
-              <Button variant="outline" size="icon" onClick={prev} aria-label="Anterior">
+              <Button variant="outline" size="icon" onClick={prev} aria-label="Anterior" disabled={controlsDisabled}>
                 <SkipBack className="h-5 w-5" />
               </Button>
               {isPlaying ? (
-                <Button variant="default" size="icon" onClick={pause} aria-label="Pausar">
+                <Button variant="default" size="icon" onClick={pause} aria-label="Pausar" disabled={controlsDisabled}>
                   <Pause className="h-6 w-6" />
                 </Button>
               ) : (
-                <Button variant="default" size="icon" onClick={play} aria-label="Tocar">
+                <Button variant="default" size="icon" onClick={play} aria-label="Tocar" disabled={controlsDisabled}>
                   <Play className="h-6 w-6" />
                 </Button>
               )}
-              <Button variant="outline" size="icon" onClick={next} aria-label="Próximo">
+              <Button variant="outline" size="icon" onClick={next} aria-label="Próximo" disabled={controlsDisabled}>
                 <SkipForward className="h-5 w-5" />
               </Button>
               <Button
@@ -138,6 +139,7 @@ export default function RadioPlayer({ compact = false }: RadioPlayerProps) {
                 onClick={() => setIsShuffled((s) => !s)}
                 aria-label="Alternar aleatório"
                 title={isShuffled ? "Aleatório ativo" : "Aleatório inativo"}
+                disabled={controlsDisabled}
               >
                 <Shuffle className="h-5 w-5" />
               </Button>
@@ -150,13 +152,14 @@ export default function RadioPlayer({ compact = false }: RadioPlayerProps) {
                   value={volume}
                   onChange={(e) => setVolume(parseFloat(e.target.value))}
                   aria-label="Volume"
+                  disabled={controlsDisabled}
                 />
               </div>
         </div>
 
         {!compact && (
           <div className="text-sm text-muted-foreground truncate">
-            {currentTrack?.title ?? currentTrack?.url}
+            {hasTracks ? (currentTrack?.title ?? currentTrack?.url) : "Adicione músicas em lib/config.ts (RADIO_PLAYLIST)"}
           </div>
         )}
 

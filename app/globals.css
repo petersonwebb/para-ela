@@ -4,36 +4,36 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color tokens for romantic dark theme with soft pink accents */
-  --background: oklch(0.1 0 0); /* Dark sophisticated background */
-  --foreground: oklch(0.98 0 0); /* Pure white for text */
-  --card: oklch(0.98 0 0); /* White cards for content sections */
-  --card-foreground: oklch(0.1 0 0); /* Dark text on cards */
-  --popover: oklch(0.88 0.05 350); /* Soft pink popover backgrounds */
-  --popover-foreground: oklch(0.1 0 0); /* Dark text on popovers */
-  --primary: oklch(0.88 0.05 350); /* Soft pink for call-to-action buttons */
-  --primary-foreground: oklch(0.1 0 0); /* Dark text on primary buttons */
-  --secondary: oklch(0.8 0 0); /* Light gray for muted text */
-  --secondary-foreground: oklch(0.1 0 0); /* Dark text on secondary elements */
-  --muted: oklch(0.8 0 0); /* Light gray for background elements */
-  --muted-foreground: oklch(0.1 0 0); /* Dark text on muted sections */
-  --accent: oklch(0.88 0.05 350); /* Soft pink accents */
-  --accent-foreground: oklch(0.1 0 0); /* Dark text on accent elements */
+  /* Dark Elegant theme with soft pink accents */
+  --background: oklch(0.08 0.02 280); /* Dark blue-gray background */
+  --foreground: oklch(0.97 0.01 0); /* Soft white for text */
+  --card: oklch(0.15 0.02 280); /* Slightly lighter cards */
+  --card-foreground: oklch(0.97 0.01 0); /* Soft white text on cards */
+  --popover: oklch(0.18 0.03 320); /* Soft purple-pink popover */
+  --popover-foreground: oklch(0.97 0.01 0); /* Soft white text on popovers */
+  --primary: oklch(0.75 0.15 350); /* Soft pink primary */
+  --primary-foreground: oklch(0.08 0.02 280); /* Dark text on primary */
+  --secondary: oklch(0.25 0.02 280); /* Medium gray for secondary */
+  --secondary-foreground: oklch(0.97 0.01 0); /* Soft white text on secondary */
+  --muted: oklch(0.20 0.02 280); /* Muted gray background */
+  --muted-foreground: oklch(0.65 0.02 280); /* Muted text */
+  --accent: oklch(0.70 0.12 340); /* Soft pink-purple accent */
+  --accent-foreground: oklch(0.08 0.02 280); /* Dark text on accent */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.3 0 0); /* Dark gray for borders */
-  --input: oklch(0.98 0 0); /* White input backgrounds */
-  --ring: oklch(0.88 0.05 350); /* Soft pink for focus rings */
+  --border: oklch(0.25 0.03 320); /* Soft purple-pink borders */
+  --input: oklch(0.15 0.02 280); /* Dark input backgrounds */
+  --ring: oklch(0.75 0.15 350); /* Soft pink focus rings */
   --chart-1: oklch(0.88 0.05 350); /* Soft pink for charts */
   --chart-2: oklch(0.8 0 0); /* Light gray for charts */
   --chart-3: oklch(0.98 0 0); /* White for charts */
   --chart-4: oklch(0.3 0 0); /* Dark gray for charts */
   --chart-5: oklch(0.1 0 0); /* Dark for charts */
-  --radius: 0.5rem; /* Rounded corners for cards and buttons */
-  --sidebar: oklch(0.1 0 0); /* Dark sidebar background */
-  --sidebar-foreground: oklch(0.98 0 0); /* White text in sidebar */
-  --sidebar-primary: oklch(0.88 0.05 350); /* Soft pink for sidebar highlights */
-  --sidebar-primary-foreground: oklch(0.1 0 0); /* Dark text in sidebar highlights */
+  --radius: 0.75rem; /* More rounded corners */
+  --sidebar: oklch(0.08 0.02 280); /* Dark sidebar background */
+  --sidebar-foreground: oklch(0.97 0.01 0); /* Soft white text in sidebar */
+  --sidebar-primary: oklch(0.75 0.15 350); /* Soft pink for sidebar highlights */
+  --sidebar-primary-foreground: oklch(0.08 0.02 280); /* Dark text in sidebar highlights */
   --sidebar-accent: oklch(0.8 0 0); /* Light gray for sidebar accents */
   --sidebar-accent-foreground: oklch(0.1 0 0); /* Dark text on sidebar accents */
   --sidebar-border: oklch(0.3 0 0); /* Dark gray borders in sidebar */
@@ -77,10 +77,16 @@
 }
 
 @theme inline {
-  /* Added romantic fonts for the vlog theme */
+  /* Enhanced romantic fonts and spacing */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-romantic: "Playfair Display", serif;
+  
+  /* Custom gradients and effects */
+  --gradient-primary: linear-gradient(135deg, oklch(0.75 0.15 350), oklch(0.70 0.12 340));
+  --gradient-card: linear-gradient(135deg, oklch(0.15 0.02 280), oklch(0.18 0.03 320));
+  --shadow-soft: 0 4px 20px oklch(0.08 0.02 280 / 0.3);
+  --shadow-card: 0 8px 32px oklch(0.08 0.02 280 / 0.4);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -138,21 +144,21 @@
   }
 }
 
-/* Added custom animations for the romantic theme */
+/* Enhanced animations for elegant theme */
 @keyframes float {
   0%,
   100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -166,12 +172,12 @@
     transform: scale(1);
   }
   50% {
-    transform: scale(1.05);
+    transform: scale(1.03);
   }
 }
 
 .animate-float {
-  animation: float 3s ease-in-out infinite;
+  animation: float 4s ease-in-out infinite;
 }
 
 .animate-fade-in-up {
@@ -179,7 +185,20 @@
 }
 
 .animate-heartbeat {
-  animation: heartbeat 2s ease-in-out infinite;
+  animation: heartbeat 2.5s ease-in-out infinite;
+}
+
+/* Enhanced card styles */
+.card-elegant {
+  background: var(--gradient-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid oklch(0.25 0.03 320 / 0.3);
+  box-shadow: var(--shadow-card);
+}
+
+.card-elegant:hover {
+  border-color: oklch(0.75 0.15 350 / 0.5);
+  box-shadow: var(--shadow-soft), 0 0 20px oklch(0.75 0.15 350 / 0.2);
 }
 
 /* Animações neon para o card */

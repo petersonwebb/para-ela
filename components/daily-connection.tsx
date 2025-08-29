@@ -40,8 +40,8 @@ export default function DailyConnection() {
       <div className="max-w-4xl mx-auto space-y-8">
         <h2 className="font-playfair text-3xl md:text-4xl text-primary text-center">Rotina diária & conexão</h2>
 
-        <Card className="p-4 md:p-6 bg-card/50 backdrop-blur-sm border-primary/20">
-          <h3 className="font-semibold mb-3">Check‑in do humor</h3>
+        <Card className="p-6 md:p-8 card-elegant">
+          <h3 className="font-semibold mb-4">Check‑in do humor</h3>
           <div className="flex flex-wrap gap-2">
             {[
               { v: "feliz", l: "😊 Feliz" },

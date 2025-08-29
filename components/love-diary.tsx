@@ -222,7 +222,7 @@ export default function LoveDiary() {
                          <iframe
                width="100%"
                height="200"
-               src="https://www.youtube.com/embed/45ebKDLXmWg?autoplay=1&mute=0&volume=0.5&controls=1&loop=1&playlist=45ebKDLXmWg&enablejsapi=1&rel=0"
+               src="https://www.youtube.com/embed/HWVlxMwx8KY?autoplay=1&mute=0&volume=0.5&controls=1&loop=1&playlist=45ebKDLXmWg&enablejsapi=1&rel=0"
                title="Música Romântica de Fundo"
                frameBorder="0"
                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

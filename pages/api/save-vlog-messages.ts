@@ -18,6 +18,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    console.log('Token do GitHub configurado:', GITHUB_TOKEN ? 'Sim' : 'Não');
+    
     // Buscar SHA atual do arquivo
     const fileRes = await fetch(getApiUrl(), {
       headers: {
@@ -25,10 +27,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         'Accept': 'application/vnd.github.v3+json'
       }
     });
+    
+    console.log('Resposta da busca do arquivo:', fileRes.status, fileRes.statusText);
+    
+    if (!fileRes.ok) {
+      const errorText = await fileRes.text();
+      console.error('Erro ao buscar arquivo:', errorText);
+      return res.status(500).json({ error: 'Erro ao buscar arquivo no GitHub', details: errorText });
+    }
+    
     const fileData = await fileRes.json();
     const sha = fileData.sha;
+    console.log('SHA do arquivo encontrado:', sha);
 
     // Atualizar arquivo no GitHub
+    console.log('Tentando atualizar arquivo no GitHub...');
     const updateRes = await fetch(getApiUrl(), {
       method: 'PUT',
       headers: {
@@ -42,11 +55,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         sha: sha
       })
     });
+    
+    console.log('Resposta da atualização:', updateRes.status, updateRes.statusText);
+    
     if (!updateRes.ok) {
       const errorText = await updateRes.text();
+      console.error('Erro ao salvar no GitHub:', errorText);
       return res.status(500).json({ error: 'Erro ao salvar no GitHub', details: errorText });
     }
-    return res.status(200).json({ success: true });
+    
+    const result = await updateRes.json();
+    console.log('Arquivo atualizado com sucesso:', result);
+    return res.status(200).json({ success: true, details: result });
   } catch (error) {
     return res.status(500).json({ error: 'Erro ao salvar mensagens', details: String(error) });
   }

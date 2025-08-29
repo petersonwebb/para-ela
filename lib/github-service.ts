@@ -71,6 +71,22 @@ export const loadMessagesFromGitHub = async (): Promise<VlogEntry[]> => {
     }
     
     console.log('Mensagens carregadas do GitHub:', messages)
+    
+    // Se o GitHub estiver vazio, verificar localStorage
+    if (!Array.isArray(messages) || messages.length === 0) {
+      console.log('GitHub vazio, verificando localStorage...');
+      const savedMessages = localStorage.getItem('vlogEntries');
+      if (savedMessages) {
+        try {
+          const parsedMessages = JSON.parse(savedMessages);
+          console.log('Mensagens encontradas no localStorage:', parsedMessages);
+          return Array.isArray(parsedMessages) ? parsedMessages : [];
+        } catch (e) {
+          console.error('Erro ao carregar do localStorage:', e);
+        }
+      }
+    }
+    
     return Array.isArray(messages) ? messages : []
   } catch (error) {
     console.error('Erro ao carregar mensagens do GitHub:', error)
@@ -99,11 +115,19 @@ export const saveMessagesToGitHub = async (messages: VlogEntry[]): Promise<boole
       });
       
       if (response.ok) {
-        console.log('Mensagens salvas via API local!');
+        const result = await response.json();
+        console.log('Mensagens salvas via API local!', result);
         return true;
       } else {
         const error = await response.json();
         console.error('Erro na API local:', error);
+        console.log('Detalhes do erro:', error.details);
+        
+        // Se o erro for relacionado ao token, usar apenas localStorage
+        if (error.details && error.details.includes('Token')) {
+          console.log('Token do GitHub não configurado. Usando apenas localStorage.');
+          return true; // Retorna true mesmo assim para não bloquear o usuário
+        }
       }
     } catch (error) {
       console.log('API local não disponível, tentando Netlify Function...');

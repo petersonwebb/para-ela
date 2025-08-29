@@ -11,16 +11,6 @@ CREATE TABLE IF NOT EXISTS mood_entries (
   UNIQUE(user_name, date)
 );
 
--- Tabela para respostas do prompt do dia
-CREATE TABLE IF NOT EXISTS prompt_answers (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_name TEXT NOT NULL,
-  prompt TEXT NOT NULL,
-  answer TEXT NOT NULL,
-  date DATE NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(user_name, date)
-);
 
 -- Tabela para progresso da caça ao tesouro
 CREATE TABLE IF NOT EXISTS treasure_progress (
@@ -43,12 +33,10 @@ CREATE TABLE IF NOT EXISTS art_canvas (
 
 -- Habilitar RLS (Row Level Security)
 ALTER TABLE mood_entries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE prompt_answers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE treasure_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE art_canvas ENABLE ROW LEVEL SECURITY;
 
 -- Políticas para permitir acesso público (para simplicidade)
 CREATE POLICY "Allow all operations on mood_entries" ON mood_entries FOR ALL USING (true);
-CREATE POLICY "Allow all operations on prompt_answers" ON prompt_answers FOR ALL USING (true);
 CREATE POLICY "Allow all operations on treasure_progress" ON treasure_progress FOR ALL USING (true);
 CREATE POLICY "Allow all operations on art_canvas" ON art_canvas FOR ALL USING (true);

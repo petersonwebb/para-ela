@@ -36,7 +36,6 @@ npm run dev
 ## Funcionalidades implementadas:
 
 ✅ **Check-in do humor** - Salva o humor diário de cada usuário
-✅ **Prompt do dia** - Pergunta diária com resposta salva
 ✅ **Caça ao tesouro digital** - Progresso salvo por usuário
 ✅ **Quadro de arte colaborativo** - Um desenho por vez, substituindo o anterior
 

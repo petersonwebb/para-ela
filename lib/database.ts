@@ -9,14 +9,6 @@ export interface MoodEntry {
   created_at?: string
 }
 
-export interface PromptAnswer {
-  id?: string
-  user_name: string
-  prompt: string
-  answer: string
-  date: string
-  created_at?: string
-}
 
 export interface TreasureProgress {
   id?: string
@@ -66,38 +58,6 @@ export async function getMoodEntry(userName: string, date?: string) {
   return data
 }
 
-// Funções para prompt do dia
-export async function savePromptAnswer(userName: string, prompt: string, answer: string) {
-  const today = new Date().toISOString().split('T')[0]
-  
-  const { data, error } = await supabase
-    .from('prompt_answers')
-    .upsert({
-      user_name: userName,
-      prompt,
-      answer,
-      date: today
-    }, {
-      onConflict: 'user_name,date'
-    })
-  
-  if (error) throw error
-  return data
-}
-
-export async function getPromptAnswer(userName: string, date?: string) {
-  const targetDate = date || new Date().toISOString().split('T')[0]
-  
-  const { data, error } = await supabase
-    .from('prompt_answers')
-    .select('*')
-    .eq('user_name', userName)
-    .eq('date', targetDate)
-    .single()
-  
-  if (error && error.code !== 'PGRST116') throw error
-  return data
-}
 
 // Funções para caça ao tesouro
 export async function saveTreasureProgress(userName: string, progress: number, unlocked: boolean) {

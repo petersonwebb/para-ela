@@ -219,16 +219,16 @@ export default function LoveDiary() {
         {/* Player de YouTube */}
         <div className="flex justify-center mb-12">
           <div className="w-full max-w-md">
-            <iframe
-              width="100%"
-              height="200"
-              src="https://www.youtube.com/embed/hLX_Kl0EeIw?autoplay=1&mute=0&volume=0.5&controls=1&loop=1&playlist=hLX_Kl0EeIw&enablejsapi=1&rel=0"
-              title="Música Romântica de Fundo"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="rounded-lg shadow-lg"
-            />
+                         <iframe
+               width="100%"
+               height="200"
+               src="https://www.youtube.com/embed/45ebKDLXmWg?autoplay=1&mute=0&volume=0.5&controls=1&loop=1&playlist=45ebKDLXmWg&enablejsapi=1&rel=0"
+               title="Música Romântica de Fundo"
+               frameBorder="0"
+               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+               allowFullScreen
+               className="rounded-lg shadow-lg"
+             />
           </div>
         </div>
 
